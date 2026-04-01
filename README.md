@@ -4,6 +4,11 @@
 
 AI-powered alternative credit scoring for users without formal financial history.
 
+## Live Demo
+
+Try the app here:  [https://YOUR-LINK.streamlit.app](https://altscoreai.streamlit.app/)
+
+
 ## Problem
 Millions of users (gig workers, informal sector) lack access to credit due to no formal credit history.
 ## Solution
@@ -77,14 +82,3 @@ Insights:
 
 Traditional credit systems exclude millions of Indians.
 AltScore AI rethinks creditworthiness using behavioral intelligence, thereby unlocking access to loans for gig workers, freelancers, and informal earners.
-
-## Live Demo (Local)
-
-Run the app locally:
-
-```bash
-pip install streamlit
-streamlit run app_streamlit.py
-```
-
-This launches an interactive credit scoring interface.
