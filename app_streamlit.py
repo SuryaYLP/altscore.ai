@@ -2,11 +2,25 @@ import streamlit as st
 
 st.set_page_config(page_title="AltScore AI", layout="centered")
 
+# ------------------------
+# HEADER
+# ------------------------
 st.title("💳 AltScore AI")
-st.subheader("AI-Powered Alternative Credit Scoring")
+st.caption("AI-powered alternative credit scoring | Built via vibe coding")
+
+st.subheader("Assess creditworthiness using behavioral signals")
 
 # ------------------------
-# USER TYPE
+# START FLOW (USER JOURNEY)
+# ------------------------
+start = st.button("🚀 Assess Creditworthiness")
+
+if not start:
+    st.info("Click the button to begin credit assessment")
+    st.stop()
+
+# ------------------------
+# USER PROFILE
 # ------------------------
 profile = st.selectbox(
     "Select User Profile",
@@ -17,6 +31,9 @@ st.divider()
 
 st.markdown("### 📊 Behavioral Inputs")
 
+# ------------------------
+# INPUTS
+# ------------------------
 transactions = st.slider("Monthly Transactions", 0, 300, 100)
 recharge = st.slider("Recharge Frequency", 0, 20, 5)
 location = st.slider("Location Stability", 0.0, 1.0, 0.5)
@@ -65,7 +82,9 @@ elif profile == "Student / Informal":
 
 score = max(300, min(score, 900))
 
-# Risk
+# ------------------------
+# RISK CLASSIFICATION
+# ------------------------
 if score > 750:
     risk = "Low"
 elif score > 600:
@@ -74,7 +93,7 @@ else:
     risk = "High"
 
 # ------------------------
-# OUTPUT
+# RESULTS
 # ------------------------
 st.divider()
 
@@ -83,8 +102,40 @@ st.subheader("📊 Results")
 st.metric("Credit Score", score)
 st.metric("Risk Level", risk)
 
-# Insight engine
-st.markdown("###  AI Insights")
+# Progress bar (visual polish)
+st.progress(score / 900)
+
+# ------------------------
+# LOAN ELIGIBILITY
+# ------------------------
+if score > 750:
+    loan = "₹2,00,000 - ₹5,00,000"
+    rate = "10% - 14%"
+elif score > 600:
+    loan = "₹50,000 - ₹2,00,000"
+    rate = "14% - 20%"
+else:
+    loan = "₹0 - ₹50,000"
+    rate = "20%+"
+
+st.markdown("### 💰 Loan Eligibility")
+st.write("Eligible Amount:", loan)
+st.write("Estimated Interest Rate:", rate)
+
+# ------------------------
+# SCORE BREAKDOWN
+# ------------------------
+st.markdown("### 📊 Score Breakdown")
+
+st.write("Transactions Contribution:", min(transactions * 1.5, 150))
+st.write("Cash Flow Health:", "Good" if cash_out < cash_in else "Poor")
+st.write("Savings Impact:", int(savings * 150))
+st.write("Bill Discipline:", int(bill_pay * 150))
+
+# ------------------------
+# AI INSIGHTS
+# ------------------------
+st.markdown("### 🧠 AI Insights")
 
 insights = []
 
@@ -109,9 +160,48 @@ for i in insights:
 if not insights:
     st.write("Behavior appears neutral with no strong signals.")
 
+# ------------------------
+# PERSONALIZED INSIGHT
+# ------------------------
+st.markdown("### 🎯 Personalized Insight")
+
+if profile == "Gig Worker":
+    st.write("Your income variability is considered — consistent behavior improves your score.")
+elif profile == "Salaried":
+    st.write("Stable income enhances your creditworthiness.")
+else:
+    st.write("Building financial discipline can improve your future credit access.")
+
+# ------------------------
+# DOWNLOAD REPORT
+# ------------------------
+report = f"""
+AltScore AI Report
+
+Profile: {profile}
+Score: {score}
+Risk: {risk}
+
+Loan Eligibility: {loan}
+Interest Rate: {rate}
+"""
+
+st.download_button("📄 Download Report", report)
+
+# ------------------------
+# TRUST LAYER
+# ------------------------
 st.divider()
 
+st.markdown("### 🔒 Data Privacy")
+st.caption(
+    "This prototype uses simulated data. In production, all user data would be encrypted and processed securely."
+)
+
+# ------------------------
+# MODEL NOTE
+# ------------------------
 st.markdown("### 🔍 Model Note")
 st.write(
-    "This prototype evaluates behavioral signals instead of traditional credit history to assess creditworthiness."
+    "This system evaluates behavioral signals instead of traditional credit history to assess creditworthiness."
 )
