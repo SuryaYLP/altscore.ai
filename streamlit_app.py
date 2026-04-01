@@ -15,6 +15,6 @@ elif score > 600:
     risk = "Medium"
 else:
     risk = "High"
-
+ 
 st.write("### Credit Score:", score)
 st.write("### Risk Level:", risk)
