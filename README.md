@@ -6,7 +6,7 @@ AI-powered alternative credit scoring for users without formal financial history
 
 ## Live Demo
 
-Try the app here:  [https://YOUR-LINK.streamlit.app](https://altscoreai.streamlit.app/)
+Try the app here:  https://altscoreai.streamlit.app/
 
 
 ## Problem
