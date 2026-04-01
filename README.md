@@ -77,3 +77,14 @@ Insights:
 
 Traditional credit systems exclude millions of Indians.
 AltScore AI rethinks creditworthiness using behavioral intelligence, thereby unlocking access to loans for gig workers, freelancers, and informal earners.
+
+## Live Demo (Local)
+
+Run the app locally:
+
+```bash
+pip install streamlit
+streamlit run app_streamlit.py
+```
+
+This launches an interactive credit scoring interface.
