@@ -4,7 +4,7 @@ India has over 300M+ individuals with limited or no formal credit history.
 
 Traditional systems rely on:
 
-* Salary slips
+* Salary slips 
 * Bank statements
 * Credit history
 
