@@ -1,0 +1,7 @@
+AltScore: 682
+Risk: Medium
+
+Insights:
+- Stable transaction behavior
+- Moderate income volatility
+- Consistent location patterns
