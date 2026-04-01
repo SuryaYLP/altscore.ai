@@ -35,6 +35,13 @@ Input:
 
 Output:
 
+* Credit Score: 670
+* Risk Level: Medium
+
+## Iteration 2: Improving scoring logic
+
+Output:
+
 * Credit Score: 682
 * Risk Level: Medium
 
