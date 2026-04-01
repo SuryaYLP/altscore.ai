@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+import math
 
 st.set_page_config(page_title="AltScore AI", layout="centered")
 
@@ -11,9 +13,9 @@ st.caption("AI-powered alternative credit scoring | Built via vibe coding")
 st.subheader("Assess creditworthiness using behavioral signals")
 
 # ------------------------
-# START FLOW (USER JOURNEY)
+# START FLOW
 # ------------------------
-start = st.button("Assess Creditworthiness")
+start = st.button("🚀 Assess Creditworthiness")
 
 if not start:
     st.info("Click the button to begin credit assessment")
@@ -32,7 +34,7 @@ st.divider()
 st.markdown("### 📊 Behavioral Inputs")
 
 # ------------------------
-# INPUTS
+# DEFAULT INPUTS
 # ------------------------
 transactions = st.slider("Monthly Transactions", 0, 300, 100)
 recharge = st.slider("Recharge Frequency", 0, 20, 5)
@@ -46,44 +48,63 @@ bill_pay = st.slider("Bill Payment Consistency", 0.0, 1.0, 0.6)
 savings = st.slider("Savings Ratio", 0.0, 1.0, 0.2)
 
 # ------------------------
-# SCORING LOGIC
+# FILE UPLOAD
+# ------------------------
+st.markdown("### 📂 Upload Bank Statement (Optional)")
+
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+    st.write("Preview of uploaded data:")
+    st.dataframe(df.head())
+
+    if "amount" in df.columns:
+        cash_in = df[df["amount"] > 0]["amount"].sum()
+        cash_out = abs(df[df["amount"] < 0]["amount"].sum())
+
+        st.success(f"Detected Cash Inflow: ₹{int(cash_in)}")
+        st.success(f"Detected Cash Outflow: ₹{int(cash_out)}")
+
+# ------------------------
+# ML-LIKE SCORING
 # ------------------------
 score = 300
 
-# Basic signals
-score += min(transactions * 1.5, 150)
-score += min(recharge * 5, 100)
-score += int(location * 150)
+t_norm = min(transactions / 200, 1)
+r_norm = min(recharge / 10, 1)
+l_norm = location
+s_norm = savings
+b_norm = bill_pay
+p_norm = min(p2p / 50, 1)
 
-# Cash flow health
 if cash_in > 0:
-    ratio = cash_out / cash_in
-    if ratio < 0.7:
-        score += 120
-    elif ratio < 1:
-        score += 80
-    else:
-        score -= 50
+    cf_ratio = cash_out / cash_in
+    cf_score = max(0, 1 - cf_ratio)
+else:
+    cf_score = 0.5
 
-# P2P behavior
-score += min(p2p * 1.5, 100)
+score += int(150 * t_norm)
+score += int(100 * r_norm)
+score += int(150 * l_norm)
+score += int(150 * s_norm)
+score += int(150 * b_norm)
+score += int(100 * p_norm)
+score += int(150 * cf_score)
 
-# Bill discipline
-score += int(bill_pay * 150)
+if cash_out > cash_in:
+    score -= int(100 * math.log(cash_out - cash_in + 1))
 
-# Savings behavior
-score += int(savings * 150)
-
-# Profile adjustments
 if profile == "Gig Worker":
-    score += 20
+    score += 10
 elif profile == "Student / Informal":
-    score -= 20
+    score -= 10
 
 score = max(300, min(score, 900))
 
 # ------------------------
-# RISK CLASSIFICATION
+# RISK
 # ------------------------
 if score > 750:
     risk = "Low"
@@ -102,7 +123,6 @@ st.subheader("📊 Results")
 st.metric("Credit Score", score)
 st.metric("Risk Level", risk)
 
-# Progress bar (visual polish)
 st.progress(score / 900)
 
 # ------------------------
@@ -123,54 +143,81 @@ st.write("Eligible Amount:", loan)
 st.write("Estimated Interest Rate:", rate)
 
 # ------------------------
-# SCORE BREAKDOWN
+# BREAKDOWN
 # ------------------------
 st.markdown("### 📊 Score Breakdown")
 
-st.write("Transactions Contribution:", min(transactions * 1.5, 150))
-st.write("Cash Flow Health:", "Good" if cash_out < cash_in else "Poor")
-st.write("Savings Impact:", int(savings * 150))
-st.write("Bill Discipline:", int(bill_pay * 150))
+st.write("Transactions Contribution:", int(150 * t_norm))
+st.write("Savings Contribution:", int(150 * s_norm))
+st.write("Bill Discipline Contribution:", int(150 * b_norm))
+st.write("Cash Flow Score:", round(cf_score, 2))
 
 # ------------------------
-# AI INSIGHTS
+# AI ANALYSIS
 # ------------------------
-st.markdown("### AI Insights")
+st.markdown("### AI Analysis")
 
-insights = []
+analysis = f"""
+User Profile: {profile}
+
+Financial Behavior Summary:
+- Cash flow ratio: {round(cash_out / cash_in, 2) if cash_in > 0 else "N/A"}
+- Savings ratio: {round(savings, 2)}
+- Bill discipline: {round(bill_pay, 2)}
+
+Key Observations:
+"""
 
 if cash_out > cash_in:
-    insights.append("Spending exceeds income → high financial stress")
+    analysis += "\n- Spending exceeds income → financial stress."
+else:
+    analysis += "\n- Positive cash flow indicates stability."
 
 if savings < 0.2:
-    insights.append("Low savings buffer")
+    analysis += "\n- Low savings buffer."
 
 if bill_pay > 0.7:
-    insights.append("Strong bill payment discipline")
+    analysis += "\n- Strong repayment discipline."
 
 if location > 0.7:
-    insights.append("High location stability")
+    analysis += "\n- Stable location behavior."
 
 if p2p > 40:
-    insights.append("Strong peer network activity")
+    analysis += "\n- Strong peer network activity."
 
-for i in insights:
-    st.write("- " + i)
+analysis += "\n\nRecommendation: "
 
-if not insights:
-    st.write("Behavior appears neutral with no strong signals.")
+if score > 750:
+    analysis += "Eligible for premium lending."
+elif score > 600:
+    analysis += "Moderate risk — controlled lending."
+else:
+    analysis += "High risk — limited lending."
+
+st.code(analysis)
 
 # ------------------------
 # PERSONALIZED INSIGHT
 # ------------------------
-st.markdown("### Personalized Insight")
+st.markdown("### 🎯 Personalized Insight")
 
 if profile == "Gig Worker":
-    st.write("Your income variability is considered — consistent behavior improves your score.")
+    st.write("Income variability is accounted — consistency improves your score.")
 elif profile == "Salaried":
-    st.write("Stable income enhances your creditworthiness.")
+    st.write("Stable income boosts your creditworthiness.")
 else:
-    st.write("Building financial discipline can improve your future credit access.")
+    st.write("Improving discipline can unlock future credit access.")
+
+# ------------------------
+# FRAUD SIGNALS
+# ------------------------
+st.markdown("### 🚨 Risk Signals")
+
+if transactions > 250 and savings < 0.1:
+    st.warning("High transactions + low savings → potential risk")
+
+if cash_in == 0:
+    st.error("No income detected → high default risk")
 
 # ------------------------
 # DOWNLOAD REPORT
@@ -194,14 +241,10 @@ st.download_button("📄 Download Report", report)
 st.divider()
 
 st.markdown("### 🔒 Data Privacy")
-st.caption(
-    "This prototype uses simulated data. In production, all user data would be encrypted and processed securely."
-)
+st.caption("Prototype only. Production systems would use encrypted, secure processing.")
 
 # ------------------------
 # MODEL NOTE
 # ------------------------
 st.markdown("### 🔍 Model Note")
-st.write(
-    "This system evaluates behavioral signals instead of traditional credit history to assess creditworthiness."
-)
+st.write("This system evaluates behavioral signals instead of traditional credit history.")
