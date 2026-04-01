@@ -13,7 +13,7 @@ st.caption("AI-powered alternative credit scoring | Built via vibe coding")
 st.markdown("---")
 
 # ------------------------
-# SESSION STATE (FIX)
+# SESSION STATE
 # ------------------------
 if "started" not in st.session_state:
     st.session_state.started = False
@@ -36,7 +36,7 @@ profile = st.selectbox(
 st.markdown("---")
 
 # ------------------------
-# LAYOUT (2 COLUMNS)
+# LAYOUT
 # ------------------------
 col1, col2 = st.columns(2)
 
@@ -56,6 +56,7 @@ with col2:
 
     cash_in = st.number_input("Monthly Cash Inflow (₹)", 0, 200000, 30000)
     cash_out = st.number_input("Monthly Cash Outflow (₹)", 0, 200000, 25000)
+    obligations = st.number_input("Monthly Fixed Obligations (EMIs, Rent) (₹)", 0, 200000, 10000)
 
     st.markdown("### 📂 Upload Bank Statement")
 
@@ -72,6 +73,14 @@ with col2:
 
             st.success(f"Inflow detected: ₹{int(cash_in)}")
             st.success(f"Outflow detected: ₹{int(cash_out)}")
+
+# ------------------------
+# FOIR CALCULATION
+# ------------------------
+if cash_in > 0:
+    foir = obligations / cash_in
+else:
+    foir = 0
 
 # ------------------------
 # SCORING (ML-LIKE)
@@ -99,9 +108,19 @@ score += int(150 * b_norm)
 score += int(100 * p_norm)
 score += int(150 * cf_score)
 
+# FOIR IMPACT
+if foir < 0.4:
+    score += 100
+elif foir < 0.6:
+    score += 40
+else:
+    score -= 80
+
+# Non-linear penalty
 if cash_out > cash_in:
     score -= int(100 * math.log(cash_out - cash_in + 1))
 
+# Profile adjustment
 if profile == "Gig Worker":
     score += 10
 elif profile == "Student / Informal":
@@ -122,7 +141,7 @@ else:
 st.markdown("---")
 
 # ------------------------
-# RESULTS (3 COLUMNS)
+# RESULTS
 # ------------------------
 r1, r2, r3 = st.columns(3)
 
@@ -144,17 +163,29 @@ r3.metric("💰 Loan Range", loan)
 st.progress(score / 900)
 
 # ------------------------
-# BREAKDOWN + INSIGHTS (2 COL)
+# FOIR DISPLAY
+# ------------------------
+st.markdown(f"### 📉 FOIR: {round(foir, 2)}")
+
+if foir < 0.4:
+    st.success("Healthy obligation ratio")
+elif foir < 0.6:
+    st.warning("Moderate financial burden")
+else:
+    st.error("High financial stress")
+
+# ------------------------
+# BREAKDOWN + ANALYSIS
 # ------------------------
 c1, c2 = st.columns(2)
 
 with c1:
     st.markdown("### 📊 Score Breakdown")
-
     st.write("Transactions:", int(150 * t_norm))
     st.write("Savings:", int(150 * s_norm))
     st.write("Bill Discipline:", int(150 * b_norm))
     st.write("Cash Flow Score:", round(cf_score, 2))
+    st.write("FOIR:", round(foir, 2))
 
 with c2:
     st.markdown("### 🧠 AI Analysis")
@@ -163,6 +194,7 @@ with c2:
 Profile: {profile}
 
 Cash Flow Ratio: {round(cash_out / cash_in, 2) if cash_in > 0 else "N/A"}
+FOIR: {round(foir, 2)}
 
 Observations:
 """
@@ -178,11 +210,8 @@ Observations:
     if bill_pay > 0.7:
         analysis += "\n- Strong repayment discipline"
 
-    if location > 0.7:
-        analysis += "\n- Stable behavior"
-
-    if p2p > 40:
-        analysis += "\n- Active financial network"
+    if foir > 0.6:
+        analysis += "\n- High fixed obligations"
 
     st.code(analysis)
 
@@ -199,7 +228,7 @@ else:
     st.info("Improving discipline will unlock credit access")
 
 # ------------------------
-# RISK FLAGS
+# RISK SIGNALS
 # ------------------------
 st.markdown("### 🚨 Risk Signals")
 
@@ -219,6 +248,7 @@ Score: {score}
 Risk: {risk}
 Loan: {loan}
 Rate: {rate}
+FOIR: {round(foir, 2)}
 """
 
 st.download_button("📄 Download Report", report)
@@ -230,6 +260,6 @@ st.markdown("---")
 
 st.caption("🔒 Data is simulated. Production systems would use secure pipelines.")
 
-# Reset button
+# RESET
 if st.button("🔄 Reset"):
     st.session_state.started = False
