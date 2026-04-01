@@ -25,6 +25,23 @@ Output:
 * Risk Level (Low / Medium / High)
 * Behavioral Insights
 
+## Demo (Simulated Run)
+
+Input:
+
+* Monthly Transactions: 120
+* Recharge Frequency: 8
+* Location Stability: 0.7
+
+Output:
+
+* Credit Score: 682
+* Risk Level: Medium
+
+AI Insight:
+This user shows consistent behavioral patterns despite income volatility, making them moderately creditworthy.
+
+
 ## Example Output
 
 User Profile: Gig worker with inconsistent income
@@ -48,3 +65,8 @@ Insights:
 * Real-time data integrations
 * ML-based scoring models
 * Lending APIs
+
+## Why This Matters
+
+Traditional credit systems exclude millions of Indians.
+AltScore AI rethinks creditworthiness using behavioral intelligence, thereby unlocking access to loans for gig workers, freelancers, and informal earners.
