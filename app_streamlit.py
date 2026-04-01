@@ -84,7 +84,7 @@ st.metric("Credit Score", score)
 st.metric("Risk Level", risk)
 
 # Insight engine
-st.markdown("### 🧠 AI Insights")
+st.markdown("###  AI Insights")
 
 insights = []
 
