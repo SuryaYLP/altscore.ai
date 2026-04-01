@@ -13,7 +13,7 @@ st.subheader("Assess creditworthiness using behavioral signals")
 # ------------------------
 # START FLOW (USER JOURNEY)
 # ------------------------
-start = st.button("🚀 Assess Creditworthiness")
+start = st.button("Assess Creditworthiness")
 
 if not start:
     st.info("Click the button to begin credit assessment")
@@ -135,7 +135,7 @@ st.write("Bill Discipline:", int(bill_pay * 150))
 # ------------------------
 # AI INSIGHTS
 # ------------------------
-st.markdown("### 🧠 AI Insights")
+st.markdown("### AI Insights")
 
 insights = []
 
@@ -163,7 +163,7 @@ if not insights:
 # ------------------------
 # PERSONALIZED INSIGHT
 # ------------------------
-st.markdown("### 🎯 Personalized Insight")
+st.markdown("### Personalized Insight")
 
 if profile == "Gig Worker":
     st.write("Your income variability is considered — consistent behavior improves your score.")
