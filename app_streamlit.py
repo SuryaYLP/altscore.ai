@@ -438,26 +438,26 @@ if st.session_state.results is not None:
     # ------------------------
     # PDF DOWNLOAD
     # ------------------------
-        from reportlab.platypus import Table, TableStyle
-        from reportlab.lib import colors
+    from reportlab.platypus import Table, TableStyle
+    from reportlab.lib import colors
 
-        data = [
-            ["Metric", "Value"],
-            ["Score", r["score"]],
-            ["FOIR", round(r["foir"],2)],
-            ["Savings Ratio", round(r["savings_ratio"],2)],
-            ["Income", r["total_income"]],
-            ["Expenses", r["total_expenses"]],
-        ]
+    data = [
+        ["Metric", "Value"],
+        ["Score", r["score"]],
+        ["FOIR", round(r["foir"],2)],
+        ["Savings Ratio", round(r["savings_ratio"],2)],
+        ["Income", r["total_income"]],
+        ["Expenses", r["total_expenses"]],
+    ]
         
-        table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.blue),
-            ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-            ('GRID', (0,0), (-1,-1), 1, colors.black)
-        ]))
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.blue),
+        ('TEXTCOLOR',(0,0),(-1,0),colors.white),
+        ('GRID', (0,0), (-1,-1), 1, colors.black)
+    ]))
         
-        content.append(table)
+    content.append(table)
     
-        with open("report.pdf", "rb") as f:
-            st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
+    with open("report.pdf", "rb") as f:
+        st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
