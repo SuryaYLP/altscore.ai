@@ -675,8 +675,7 @@ if st.session_state.results is not None:
     width = doc.width + 20
     height = doc.height + 20
     
-    canvas.rect(x, y, width, height)
-    
+        
     canvas.restoreState()
 
     
