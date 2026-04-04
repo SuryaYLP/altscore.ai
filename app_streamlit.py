@@ -444,7 +444,13 @@ if st.session_state.results is not None:
     from reportlab.lib.units import inch
     from datetime import datetime
     
-    doc = SimpleDocTemplate("report.pdf")
+    doc = SimpleDocTemplate(
+    "report.pdf",
+    rightMargin=40,
+    leftMargin=40,
+    topMargin=50,
+    bottomMargin=40
+    )
     styles = getSampleStyleSheet()
     
     # ------------------------
@@ -654,7 +660,25 @@ if st.session_state.results is not None:
     # ------------------------
     # BORDER (THIN + CLEAN)
     # ------------------------
+   
+    
     from reportlab.pdfgen import canvas
+    doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
+    def draw_border(canvas, doc):
+    canvas.saveState()
+    
+    canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+    canvas.setLineWidth(0.8)  # thin, clean
+    
+    # Use margins to position border
+    x = doc.leftMargin - 10
+    y = doc.bottomMargin - 10
+    width = doc.width + 20
+    height = doc.height + 20
+    
+    canvas.rect(x, y, width, height)
+    
+    canvas.restoreState()
 
     
     with open("report.pdf", "rb") as f:
