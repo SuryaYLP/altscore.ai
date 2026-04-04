@@ -663,11 +663,11 @@ if st.session_state.results is not None:
    
     
     from reportlab.pdfgen import canvas
- def draw_border(canvas, doc):
-    canvas.saveState()
+    def draw_border(canvas, doc):
+        canvas.saveState()
     
-    canvas.setStrokeColor(colors.HexColor("#1f4e79"))
-    canvas.setLineWidth(0.8)  # thin, clean
+        canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+        canvas.setLineWidth(0.8)  # thin, clean
     
     # Use margins to position border
     x = doc.leftMargin - 10
