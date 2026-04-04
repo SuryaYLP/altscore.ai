@@ -16,11 +16,15 @@ st.set_page_config(page_title="AltScore AI", layout="wide")
 # ------------------------
 st.markdown("""
 <style>
-body {background-color: white;}
-h1, h2, h3 {color: #1f4e79;}
+.section {
+    background-color: #f5f9fc;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
 </style>
 """, unsafe_allow_html=True)
-
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # HEADER
 # ------------------------
@@ -46,6 +50,7 @@ if st.button("🚀 Click to Assess Creditworthiness"):
 
 if not st.session_state.start:
     st.stop()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ------------------------
 # PROFILE
@@ -177,15 +182,6 @@ calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
 # If user has moved slider, use that, else fallback
 final_savings_ratio = savings if savings > 0 else calc_savings_ratio
 
-st.markdown("### 📊 Monthly Summary")
-
-m1, m2, m3, m4 = st.columns(4)
-
-m1.metric("Avg Monthly Income", int(total_income))
-m2.metric("Avg Monthly Expenses", int(total_expenses))
-m3.metric("Avg Monthly Savings", int(total_savings))
-m4.metric("Savings Ratio", round(final_savings_ratio, 2))
-
 # ------------------------
 if st.button("🔍 Check AltScore Credit Score"):
     # ------------------------
@@ -310,6 +306,29 @@ if st.session_state.results is not None:
 
     fig2 = px.line_polar(score_df, r="Value", theta="Metric", line_close=True)
     st.plotly_chart(fig2, use_container_width=True)
+
+    import plotly.graph_objects as go
+
+st.markdown("### 📊 Credit Score Gauge")
+
+fig = go.Figure(go.Indicator(
+    mode="gauge+number",
+    value=r["score"],
+    title={'text': "Credit Score"},
+    gauge={
+        'axis': {'range': [300, 900]},
+        'bar': {'color': "#1f4e79"},
+        'steps': [
+            {'range': [300, 650], 'color': "red"},
+            {'range': [650, 700], 'color': "orange"},
+            {'range': [700, 750], 'color': "yellow"},
+            {'range': [750, 800], 'color': "lightgreen"},
+            {'range': [800, 900], 'color': "green"},
+        ],
+    }
+))
+
+st.plotly_chart(fig, use_container_width=True)
 
     # ------------------------
     # GPT AI ANALYSIS
