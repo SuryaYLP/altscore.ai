@@ -663,7 +663,7 @@ if st.session_state.results is not None:
    
     
     from reportlab.pdfgen import canvas
-    def draw_border(canvas, doc):
+ def draw_border(canvas, doc):
     canvas.saveState()
     
     canvas.setStrokeColor(colors.HexColor("#1f4e79"))
