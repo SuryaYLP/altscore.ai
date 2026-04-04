@@ -383,7 +383,7 @@ with st.spinner("AI is analyzing borrower profile..."):
         except:
             st.warning("AI analysis unavailable")
             
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # CONFIDENCE SCORE
