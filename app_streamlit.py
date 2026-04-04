@@ -676,8 +676,7 @@ if st.session_state.results is not None:
     height = doc.height + 20
     
         
-    canvas.restoreState()
-
+    
     
     with open("report.pdf", "rb") as f:
         st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
