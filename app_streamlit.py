@@ -261,16 +261,19 @@ if score is not None:
     r3.metric("Savings Ratio", round(savings, 2))
 
 # Loan eligibility (added back)
-if score > 750:
-    loan = "₹2L - ₹5L"
-    rate = "10% - 14%"
-elif score > 600:
-    loan = "₹50K - ₹2L"
-    rate = "14% - 20%"
-else:
-    loan = "₹0 - ₹50K"
-    rate = "20%+"
+if score is not None:
 
+    if score > 750:
+        risk = "Low"
+        st.success("Low Risk")
+
+    elif score > 600:
+        risk = "Medium"
+        st.warning("Medium Risk")
+
+    else:
+        risk = "High"
+        st.error("High Risk")
 r4.metric("Eligible Loan", loan)
 
 st.progress(score / 900)
