@@ -423,20 +423,20 @@ with st.spinner("AI is analyzing borrower profile..."):
     # ------------------------
     # PDF DOWNLOAD
     # ------------------------
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
 
-    doc = SimpleDocTemplate("report.pdf")
-    styles = getSampleStyleSheet()
-
-    content = []
-    content.append(Paragraph("AltScore Report", styles['Title']))
-    content.append(Spacer(1, 12))
-    content.append(Paragraph(f"Score: {r['score']}", styles['Normal']))
-    content.append(Paragraph(f"Risk: {risk}", styles['Normal']))
-    content.append(Paragraph(f"FOIR: {round(r['foir'],2)}", styles['Normal']))
-
-    doc.build(content)
-
-    with open("report.pdf", "rb") as f:
-        st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
+        doc = SimpleDocTemplate("report.pdf")
+        styles = getSampleStyleSheet()
+    
+        content = []
+        content.append(Paragraph("AltScore Report", styles['Title']))
+        content.append(Spacer(1, 12))
+        content.append(Paragraph(f"Score: {r['score']}", styles['Normal']))
+        content.append(Paragraph(f"Risk: {risk}", styles['Normal']))
+        content.append(Paragraph(f"FOIR: {round(r['foir'],2)}", styles['Normal']))
+    
+        doc.build(content)
+    
+        with open("report.pdf", "rb") as f:
+            st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
