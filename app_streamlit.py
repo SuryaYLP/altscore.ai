@@ -138,6 +138,25 @@ location = st.slider("Location stability", 0.0, 1.0, 0.7)
 # ------------------------
 # RESULT BUTTON
 # ------------------------
+# ------------------------
+# MONTHLY SUMMARY (NEW)
+# ------------------------
+total_savings = total_income - total_expenses
+calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+# If user has moved slider, use that, else fallback
+final_savings_ratio = savings if savings > 0 else calc_savings_ratio
+
+st.markdown("### 📊 Monthly Summary")
+
+m1, m2, m3, m4 = st.columns(4)
+
+m1.metric("Avg Monthly Income", int(total_income))
+m2.metric("Avg Monthly Expenses", int(total_expenses))
+m3.metric("Avg Monthly Savings", int(total_savings))
+m4.metric("Savings Ratio", round(final_savings_ratio, 2))
+
+# ------------------------
 if st.button("🔍 Check Credit Score"):
 
     # ------------------------
