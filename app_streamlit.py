@@ -227,17 +227,20 @@ if st.button("🔍 Check Credit Score"):
     # ------------------------
     if score is not None:
 
-    if score > 750:
-        risk = "Low"
-        st.success("Low Risk")
-    elif score > 600:
-        risk = "Medium"
-        st.warning("Medium Risk")
-    else:
-        risk = "High"
-        st.error("High Risk")
+        if score > 750:
+            risk = "Low"
+            st.success("Low Risk")
 
-    # ------------------------
+        elif score > 600:
+            risk = "Medium"
+            st.warning("Medium Risk")
+
+        else:
+            risk = "High"
+            st.error("High Risk")
+
+
+# ------------------------
 # RESULTS SECTION (ENHANCED UI)
 # ------------------------
 st.markdown("---")
