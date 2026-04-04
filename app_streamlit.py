@@ -322,7 +322,7 @@ if st.session_state.results is not None:
 
         st.markdown("### 📊 Credit Score Gauge")
             
-            fig = go.Figure(go.Indicator(
+        fig = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=r["score"],
                 title={'text': "Credit Score"},
