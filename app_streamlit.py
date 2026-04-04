@@ -406,7 +406,7 @@ if st.session_state.results is not None:
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
-        st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
+    st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
         analysis = []
         
         analysis.append(f"Stability Score: {round(r['stability'],2)}")
@@ -433,7 +433,7 @@ if st.session_state.results is not None:
         for line in analysis:
             st.write("• " + line)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # PDF DOWNLOAD
