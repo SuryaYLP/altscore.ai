@@ -5,7 +5,7 @@ import math
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
+st.write("Key loaded:", "OPENAI_API_KEY" in st.secrets)
 st.set_page_config(page_title="AltScore AI", layout="wide")
 
 # ------------------------
