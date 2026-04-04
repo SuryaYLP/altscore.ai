@@ -377,9 +377,9 @@ with st.spinner("AI is analyzing borrower profile..."):
         0.20 * r["cf"] +
         0.20 * (1 - r["foir"]) +
         0.15 * r["savings_ratio"]
-    )
+        )
 
-    confidence = max(0, min(confidence, 1))
+        confidence = max(0, min(confidence, 1))
 
     st.markdown("### 🎯 Model Confidence")
 
