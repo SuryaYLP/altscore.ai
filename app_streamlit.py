@@ -382,13 +382,13 @@ if st.session_state.results is not None:
     # ------------------------
     # CONFIDENCE SCORE
     # ------------------------
-        confidence = (
-            0.25 * r["stability"] +
-            0.20 * r["frequency"] +
-            0.20 * r["cf"] +
-            0.20 * (1 - r["foir"]) +
-            0.15 * r["savings_ratio"]
-            )
+    confidence = (
+        0.25 * r["stability"] +
+        0.20 * r["frequency"] +
+        0.20 * r["cf"] +
+        0.20 * (1 - r["foir"]) +
+        0.15 * r["savings_ratio"]
+        )
 
         confidence = max(0, min(confidence, 1))
 
