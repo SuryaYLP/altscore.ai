@@ -393,32 +393,32 @@ with st.spinner("AI is analyzing borrower profile..."):
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
-    st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
+        st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
 
-    analysis = []
+        analysis = []
 
-    if r["stability"] > 0.7:
-        analysis.append("Income stability is strong.")
-    else:
-        analysis.append("Income shows volatility.")
+        if r["stability"] > 0.7:
+            analysis.append("Income stability is strong.")
+        else:
+            analysis.append("Income shows volatility.")
 
-    if r["frequency"] > 0.6:
-        analysis.append("Income frequency is consistent.")
-    else:
-        analysis.append("Income is irregular.")
+        if r["frequency"] > 0.6:
+            analysis.append("Income frequency is consistent.")
+        else:
+            analysis.append("Income is irregular.")
 
-    if r["cf"] > 0.5:
-        analysis.append("Cash flow is healthy.")
-    else:
-        analysis.append("Cash flow is constrained.")
+        if r["cf"] > 0.5:
+            analysis.append("Cash flow is healthy.")
+        else:
+            analysis.append("Cash flow is constrained.")
 
-    if r["foir"] < 0.4:
-        analysis.append("Low financial stress.")
-    else:
-        analysis.append("High financial obligations.")
+        if r["foir"] < 0.4:
+            analysis.append("Low financial stress.")
+        else:
+            analysis.append("High financial obligations.")
 
-    for line in analysis:
-        st.write("• " + line)
+        for line in analysis:
+            st.write("• " + line)
 
     # ------------------------
     # PDF DOWNLOAD
