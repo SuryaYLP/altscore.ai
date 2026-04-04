@@ -314,68 +314,71 @@ if st.session_state.results is not None:
 
     fig2 = px.line_polar(score_df, r="Value", theta="Metric", line_close=True)
     st.plotly_chart(fig2, use_container_width=True)
+    if st.session_state.results is not None:
 
-    import plotly.graph_objects as go
+        r = st.session_state.results
 
-st.markdown("### 📊 Credit Score Gauge")
+        import plotly.graph_objects as go
 
-fig = go.Figure(go.Indicator(
-    mode="gauge+number",
-    value=r["score"],
-    title={'text': "Credit Score"},
-    gauge={
-        'axis': {'range': [300, 900]},
-        'bar': {'color': "#1f4e79"},
-        'steps': [
-            {'range': [300, 650], 'color': "red"},
-            {'range': [650, 700], 'color': "orange"},
-            {'range': [700, 750], 'color': "yellow"},
-            {'range': [750, 800], 'color': "lightgreen"},
-            {'range': [800, 900], 'color': "green"},
-        ],
-    }
-))
-
-st.plotly_chart(fig, use_container_width=True)
-st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("### 📊 Credit Score Gauge")
+            
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=r["score"],
+                title={'text': "Credit Score"},
+                gauge={
+                    'axis': {'range': [300, 900]},
+                    'bar': {'color': "#1f4e79"},
+                    'steps': [
+                        {'range': [300, 650], 'color': "red"},
+                        {'range': [650, 700], 'color': "orange"},
+                        {'range': [700, 750], 'color': "yellow"},
+                        {'range': [750, 800], 'color': "lightgreen"},
+                        {'range': [800, 900], 'color': "green"},
+                    ],
+                }
+            ))
+            
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
-st.markdown("### 🤖 AI Credit Analysis (GPT)")
-
-with st.spinner("AI is analyzing borrower profile..."):
-
-        try:
-            prompt = f"""
-            You are a senior credit risk analyst.
-
-            Analyze this borrower:
-
-            Income: {r["total_income"]}
-            Expenses: {r["total_expenses"]}
-            Savings Ratio: {round(r["savings_ratio"],2)}
-            FOIR: {round(r["foir"],2)}
-            Stability Score: {round(r["stability"],2)}
-            Frequency Score: {round(r["frequency"],2)}
-            Cash Flow Score: {round(r["cf"],2)}
-
-            Provide:
-            - Risk summary
-            - Key strengths
-            - Key risks
-            - Final recommendation
-            """
-
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}]
-            )
-
-            st.markdown(response.choices[0].message.content)
-
-        except Exception as e:            
-            st.markdown('</div>', unsafe_allow_html=True)
-
+    st.markdown("### 🤖 AI Credit Analysis (GPT)")
+    
+    with st.spinner("AI is analyzing borrower profile..."):
+    
+            try:
+                prompt = f"""
+                You are a senior credit risk analyst.
+    
+                Analyze this borrower:
+    
+                Income: {r["total_income"]}
+                Expenses: {r["total_expenses"]}
+                Savings Ratio: {round(r["savings_ratio"],2)}
+                FOIR: {round(r["foir"],2)}
+                Stability Score: {round(r["stability"],2)}
+                Frequency Score: {round(r["frequency"],2)}
+                Cash Flow Score: {round(r["cf"],2)}
+    
+                Provide:
+                - Risk summary
+                - Key strengths
+                - Key risks
+                - Final recommendation
+                """
+    
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+    
+                st.markdown(response.choices[0].message.content)
+    
+            except Exception as e:            
+                st.markdown('</div>', unsafe_allow_html=True)
+    
     # ------------------------
     # CONFIDENCE SCORE
     # ------------------------
