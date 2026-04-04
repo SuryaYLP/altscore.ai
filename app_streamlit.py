@@ -381,14 +381,14 @@ with st.spinner("AI is analyzing borrower profile..."):
 
         confidence = max(0, min(confidence, 1))
 
-    st.markdown("### 🎯 Model Confidence")
+        st.markdown("### 🎯 Model Confidence")
 
-    if confidence > 0.75:
-        st.success(f"High Confidence: {round(confidence,2)}")
-    elif confidence > 0.5:
-        st.warning(f"Moderate Confidence: {round(confidence,2)}")
-    else:
-        st.error(f"Low Confidence: {round(confidence,2)}")
+        if confidence > 0.75:
+            st.success(f"High Confidence: {round(confidence,2)}")
+        elif confidence > 0.5:
+            st.warning(f"Moderate Confidence: {round(confidence,2)}")
+        else:
+            st.error(f"Low Confidence: {round(confidence,2)}")
 
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
