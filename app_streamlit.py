@@ -335,7 +335,7 @@ st.plotly_chart(fig, use_container_width=True)
     # ------------------------
 st.markdown("### 🤖 AI Credit Analysis (GPT)")
 
-    with st.spinner("AI is analyzing borrower profile..."):
+with st.spinner("AI is analyzing borrower profile..."):
 
         try:
             prompt = f"""
