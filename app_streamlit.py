@@ -4,10 +4,11 @@ import numpy as np
 import math
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+import os
+from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-st.write("Key loaded:", "OPENAI_API_KEY" in st.secrets)
-st.set_page_config(page_title="AltScore AI", layout="wide")
 
+st.set_page_config(page_title="AltScore AI", layout="wide")
 # ------------------------
 # UI STYLE
 # ------------------------
@@ -313,7 +314,76 @@ fig2 = px.line_polar(
 st.plotly_chart(fig2, use_container_width=True)
 
 # ------------------------
-# ADVANCED AI ANALYSIS
+# GPT AI ANALYSIS (LIVE)
+# ------------------------
+st.markdown("### 🤖 AI Credit Analysis")
+
+with st.spinner("AI is analyzing borrower profile..."):
+
+    try:
+        prompt = f"""
+        You are a credit risk analyst.
+
+        Analyze this borrower:
+
+        Income: {total_income}
+        Expenses: {total_expenses}
+        Savings Ratio: {round(savings,2)}
+        FOIR: {round(foir,2)}
+        Stability Score: {round(stability,2)}
+        Frequency Score: {round(frequency,2)}
+        Cash Flow Score: {round(cf,2)}
+
+        Provide:
+        1. Risk summary
+        2. Key strengths
+        3. Key risks
+        4. Final recommendation
+
+        Keep it professional, concise, and structured.
+        """
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        ai_output = response.choices[0].message.content
+
+        st.markdown(ai_output)
+
+    except Exception as e:
+        st.warning("AI analysis unavailable, showing fallback")
+
+        st.write(f"""
+        Stability: {round(stability,2)}, FOIR: {round(foir,2)}.
+        Moderate underwriting risk.
+        """)
+# ------------------------
+# CONFIDENCE SCORE
+# ------------------------
+confidence = (
+    0.25 * stability +
+    0.20 * frequency +
+    0.20 * cf +
+    0.20 * (1 - foir) +
+    0.15 * savings
+)
+
+confidence = max(0, min(confidence, 1))
+
+st.markdown("### 🎯 Model Confidence")
+
+if confidence > 0.75:
+    st.success(f"High Confidence: {round(confidence,2)}")
+elif confidence > 0.5:
+    st.warning(f"Moderate Confidence: {round(confidence,2)}")
+else:
+    st.error(f"Low Confidence: {round(confidence,2)}")
+
+
+# ------------------------
+# ADVANCED AI ANALYSIS (for testing only)
 # ------------------------
 st.markdown("### 🤖 AI Credit Analysis")
 
