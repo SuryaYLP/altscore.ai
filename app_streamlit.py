@@ -33,8 +33,6 @@ st.caption("Behavioral Credit Underwriting Engine")
 st.markdown("---")
 
 st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # SESSION START BUTTON
 # ------------------------
