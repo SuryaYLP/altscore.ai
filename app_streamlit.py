@@ -390,18 +390,18 @@ if st.session_state.results is not None:
         0.15 * r["savings_ratio"]
         )
 
-        confidence = max(0, min(confidence, 1))
+    confidence = max(0, min(confidence, 1))
 
-        st.markdown("### 🎯 Model Confidence")
+    st.markdown("### 🎯 Model Confidence")
 
-        if confidence > 0.75:
-            st.success(f"High Confidence: {round(confidence,2)}")
-        elif confidence > 0.5:
-            st.warning(f"Moderate Confidence: {round(confidence,2)}")
-        else:
-            st.error(f"Low Confidence: {round(confidence,2)}")
+    if confidence > 0.75:
+        st.success(f"High Confidence: {round(confidence,2)}")
+    elif confidence > 0.5:
+        st.warning(f"Moderate Confidence: {round(confidence,2)}")
+    else:
+        st.error(f"Low Confidence: {round(confidence,2)}")
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
