@@ -24,6 +24,8 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
 st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # HEADER
@@ -32,6 +34,9 @@ st.title("💳 AltScore AI")
 st.caption("Behavioral Credit Underwriting Engine")
 
 st.markdown("---")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ------------------------
 # SESSION START BUTTON
@@ -126,6 +131,9 @@ else:
     total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)
     cv = 0.3
 
+st.markdown('</div>', unsafe_allow_html=True)
+
+
 # ------------------------
 # EXPENSES
 # ------------------------
@@ -137,6 +145,9 @@ other_expenses = st.number_input("Other expenses per month", 0, 200000, 15000)
 
 total_expenses = fixed_obligations + other_expenses
 total_savings = total_income - total_expenses
+
+st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ------------------------
 # BEHAVIORAL
@@ -157,6 +168,8 @@ p2p = st.slider("P2P transfers in a month", 0, 100, 20)
 st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
 st.caption("Indicates how stable the user's location is. Higher stability reduces default risk.")
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ------------------------
 # RESULT BUTTON
@@ -270,7 +283,7 @@ if st.session_state.results is not None:
     u3.metric("Cash Flow", round(r["cf"], 2))
 
     
-        # ------------------------
+    # ------------------------
     # RISK LABEL
     # ------------------------
     if r["score"] > 750:
@@ -282,6 +295,8 @@ if st.session_state.results is not None:
     else:
         risk = "High"
         st.error("High Risk")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # INTERACTIVE GRAPHS
@@ -329,7 +344,7 @@ fig = go.Figure(go.Indicator(
 ))
 
 st.plotly_chart(fig, use_container_width=True)
-
+st.markdown('</div>', unsafe_allow_html=True)
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
@@ -367,6 +382,8 @@ with st.spinner("AI is analyzing borrower profile..."):
 
         except:
             st.warning("AI analysis unavailable")
+            
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # CONFIDENCE SCORE
@@ -389,6 +406,8 @@ with st.spinner("AI is analyzing borrower profile..."):
             st.warning(f"Moderate Confidence: {round(confidence,2)}")
         else:
             st.error(f"Low Confidence: {round(confidence,2)}")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
@@ -419,6 +438,8 @@ with st.spinner("AI is analyzing borrower profile..."):
 
         for line in analysis:
             st.write("• " + line)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # PDF DOWNLOAD
