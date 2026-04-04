@@ -187,7 +187,7 @@ m3.metric("Avg Monthly Savings", int(total_savings))
 m4.metric("Savings Ratio", round(final_savings_ratio, 2))
 
 # ------------------------
-if st.button("🔍 Check Credit Score"):
+if st.button("🔍 Check AltScore Credit Score"):
     # ------------------------
     # CALCULATIONS
     # ------------------------
