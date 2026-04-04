@@ -654,16 +654,20 @@ if st.session_state.results is not None:
     # ------------------------
     # BORDER (THIN + CLEAN)
     # ------------------------
-    border_table = Table([[content]], colWidths=[6*inch])
-    border_table.setStyle(TableStyle([
-        ('BOX', (0,0), (-1,-1), 0.8, colors.HexColor("#1f4e79")),  # thinner border
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING', (0,0), (-1,-1), 8),
-        ('TOPPADDING', (0,0), (-1,-1), 8),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-    ]))
-    
-    doc.build([border_table])
+    from reportlab.pdfgen import canvas
+
+    def draw_border(canvas, doc):
+    canvas.saveState()
+    canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+    canvas.setLineWidth(1)  # thin border
+
+    width, height = doc.pagesize
+
+    # Draw border slightly inside page margins
+    canvas.rect(10, 10, width - 20, height - 20)
+
+    canvas.restoreState()
+    doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
     
     with open("report.pdf", "rb") as f:
         st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
