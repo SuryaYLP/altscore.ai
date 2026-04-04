@@ -407,7 +407,7 @@ with st.spinner("AI is analyzing borrower profile..."):
         else:
             st.error(f"Low Confidence: {round(confidence,2)}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
@@ -439,7 +439,7 @@ with st.spinner("AI is analyzing borrower profile..."):
         for line in analysis:
             st.write("• " + line)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # PDF DOWNLOAD
