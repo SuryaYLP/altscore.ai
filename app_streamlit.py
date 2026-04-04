@@ -7,11 +7,27 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 st.set_page_config(page_title="AltScore AI", layout="wide")
 
+# ------------------------
+# UI STYLE
+# ------------------------
+st.markdown("""
+<style>
+body {background-color: white;}
+h1, h2, h3 {color: #1f4e79;}
+</style>
+""", unsafe_allow_html=True)
+
+# ------------------------
+# HEADER
+# ------------------------
 st.title("💳 AltScore AI")
 st.caption("Behavioral Credit Underwriting Engine")
 
 st.markdown("---")
 
+# ------------------------
+# SESSION START BUTTON
+# ------------------------
 if "start" not in st.session_state:
     st.session_state.start = False
 
@@ -21,10 +37,15 @@ if st.button("🚀 Click to Assess Creditworthiness"):
 if not st.session_state.start:
     st.stop()
 
+# ------------------------
+# PROFILE
+# ------------------------
 profile = st.selectbox("Select Profile", ["Gig Worker", "Salaried", "Informal"])
 
+# ------------------------
+# GIG SEGMENTATION
+# ------------------------
 primary_income = 0
-secondary_income = 0
 
 if profile == "Gig Worker":
 
@@ -35,21 +56,47 @@ if profile == "Gig Worker":
         ["Delivery Agent", "Driver Partner", "Service Professional"]
     )
 
+    # ---------------- DELIVERY ----------------
     if sub_profile == "Delivery Agent":
         primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 20000)
         cv = st.slider("Earnings volatility (CV)", 0.0, 1.0, 0.3)
+        tenure = st.slider("Platform tenure (months)", 0, 60, 12)
+        completion = st.slider("Order completion rate", 0.0, 1.0, 0.9)
+        seasonality = st.slider("Income seasonality", 0.0, 1.0, 0.3)
+        rating_trend = st.slider("Rating trend", -1.0, 1.0, 0.2)
+        active_days = st.slider("Active days/month", 0, 30, 20)
 
+    # ---------------- DRIVER ----------------
     elif sub_profile == "Driver Partner":
         primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 25000)
+        weekly_trend = st.slider("Weekly earnings trend", -1.0, 1.0, 0.1)
+        cancel_rate = st.slider("Cancellation rate", 0.0, 1.0, 0.1)
+        tenure = st.slider("Platform tenure (months)", 0, 60, 18)
+        rating = st.slider("Driver rating", 1.0, 5.0, 4.5)
+        acceptance = st.slider("Acceptance rate", 0.0, 1.0, 0.8)
+        ownership = st.selectbox("Vehicle ownership", ["Owned", "EMI", "Rented"])
+        surge = st.slider("Surge participation", 0.0, 1.0, 0.5)
         cv = 0.3
 
+    # ---------------- SERVICE ----------------
     elif sub_profile == "Service Professional":
         primary_income = st.number_input("Monthly revenue (₹)", 0, 200000, 40000)
+        completion = st.slider("Job completion rate", 0.0, 1.0, 0.9)
+        repeat = st.slider("Repeat customer rate", 0.0, 1.0, 0.5)
+        growth = st.slider("Revenue growth", -0.5, 1.0, 0.1)
+        rating_volume = st.slider("Rating × volume", 0.0, 1.0, 0.7)
+        upskilling = st.slider("Certification level", 0.0, 1.0, 0.6)
+        breadth = st.slider("Category breadth", 0.0, 1.0, 0.5)
         cv = 0.2
 
+    # ---------------- CROSS PLATFORM ----------------
     st.markdown("### 🌐 Cross Platform Signals")
 
     secondary_income = st.number_input("Income from other platforms (₹)", 0, 200000, 10000)
+    platform_count = st.slider("Number of platforms", 1, 5, 2)
+    active_months = st.slider("Consecutive active months", 0, 60, 12)
+    yoy_growth = st.slider("YoY growth", -50, 100, 10)
+    reconciliation = st.slider("Income reconciliation score", 0.0, 1.0, 0.8)
 
     total_income = primary_income + secondary_income
 
@@ -57,6 +104,9 @@ else:
     total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)
     cv = 0.3
 
+# ------------------------
+# EXPENSES
+# ------------------------
 st.markdown("---")
 st.markdown("## 💰 Expenses")
 
@@ -66,55 +116,38 @@ other_expenses = st.number_input("Other expenses", 0, 200000, 15000)
 total_expenses = fixed_obligations + other_expenses
 
 # ------------------------
-# NEW CALCULATIONS (YOUR REQUEST)
-# ------------------------
-avg_income = total_income
-avg_expenses = total_expenses
-avg_savings = avg_income - avg_expenses
-savings_ratio = (avg_savings / avg_income) if avg_income > 0 else 0
-
-st.markdown("### 📊 Monthly Summary")
-c1, c2, c3 = st.columns(3)
-c1.metric("Avg Monthly Income", int(avg_income))
-c2.metric("Avg Monthly Expenses", int(avg_expenses))
-c3.metric("Avg Monthly Savings", int(avg_savings))
-
-# ------------------------
 # BEHAVIORAL
 # ------------------------
 st.markdown("---")
 st.markdown("## 📊 Behavioral Signals")
-st.caption("Extracted from CSV File")
 
 transactions = st.slider("Transactions", 0, 300, 100)
-st.caption("Higher transactions = more financial activity")
-
-savings = savings_ratio
-st.caption("Savings Ratio = Savings / Income. Higher is safer")
-
-bill_pay = st.slider("Bill Payment Consistency", 0.0, 1.0, 0.6)
-st.caption("Higher means more reliable bill payments")
-
+savings = st.slider("Savings ratio", 0.0, 1.0, 0.2)
+bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
 p2p = st.slider("UPI transfers", 0, 100, 20)
-st.caption("High transfers indicate active financial behavior")
-
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
-st.caption("Higher means stable living pattern")
 
 # ------------------------
 # RESULT BUTTON
 # ------------------------
 if st.button("🔍 Check Credit Score"):
 
-    foir = fixed_obligations / avg_income if avg_income > 0 else 0
+    # ------------------------
+    # FEATURE ENGINEERING
+    # ------------------------
+    foir = fixed_obligations / total_income if total_income > 0 else 0
 
     stability = max(0, 1 - cv)
     frequency = min(transactions / 200, 1)
-    cf = max(0, 1 - (avg_expenses / avg_income)) if avg_income > 0 else 0.5
+    cf = max(0, 1 - (total_expenses / total_income)) if total_income > 0 else 0.5
 
-    diversification = 0.5
+    diversification = min(platform_count / 3, 1) if profile == "Gig Worker" else 0.5
 
+    # ------------------------
+    # SCORE
+    # ------------------------
     score = 300
+
     score += int(200 * stability)
     score += int(150 * frequency)
     score += int(150 * cf)
@@ -132,44 +165,43 @@ if st.button("🔍 Check Credit Score"):
     score = max(300, min(score, 900))
 
     # ------------------------
-    # RESULTS UI (IMPROVED)
+    # RISK
+    # ------------------------
+    if score > 750:
+        risk = "Low"
+        st.success("Low Risk")
+    elif score > 600:
+        risk = "Medium"
+        st.warning("Medium Risk")
+    else:
+        risk = "High"
+        st.error("High Risk")
+
+    # ------------------------
+    # RESULTS
     # ------------------------
     st.markdown("---")
     st.markdown("## 📊 Check Credit Score")
 
-    r1, r2, r3 = st.columns(3)
-    r1.metric("Credit Score", score)
-    r2.metric("FOIR", round(foir, 2))
-    r3.metric("Savings Ratio", round(savings_ratio, 2))
-
-    if score > 750:
-        st.success("Low Risk")
-        risk = "Low"
-    elif score > 600:
-        st.warning("Medium Risk")
-        risk = "Medium"
-    else:
-        st.error("High Risk")
-        risk = "High"
+    st.metric("Score", score)
+    st.metric("FOIR", round(foir, 2))
 
     # ------------------------
-    # UNDERWRITING SIGNALS (RESTORED)
+    # UNDERWRITING SIGNALS
     # ------------------------
     st.markdown("### 🧠 Underwriting Signals")
-
-    u1, u2, u3 = st.columns(3)
-    u1.metric("Stability Score", round(stability, 2))
-    u2.metric("Income Frequency", round(frequency, 2))
-    u3.metric("Cash Flow Score", round(cf, 2))
+    st.write("Stability Score:", round(stability,2))
+    st.write("Income Frequency:", round(frequency,2))
+    st.write("Cash Flow Score:", round(cf,2))
 
     # ------------------------
-    # AI ANALYSIS (RESTORED FORMAT)
+    # AI ANALYSIS
     # ------------------------
     st.markdown("### 🤖 Detailed AI Analysis")
 
     st.write(f"""
     This borrower shows a stability score of {round(stability,2)} and income volatility (CV) of {round(cv,2)}.
-    Income consistency is {'strong' if frequency > 0.6 else 'weak'}, with average gaps of 10 days.
+    Income consistency is {'strong' if frequency > 0.6 else 'weak'}.
     FOIR is {round(foir,2)}, indicating {'low' if foir < 0.4 else 'high'} financial stress.
     Overall risk is classified as {risk}.
     """)
@@ -184,8 +216,8 @@ if st.button("🔍 Check Credit Score"):
     content.append(Paragraph("AltScore Report", styles['Title']))
     content.append(Spacer(1, 12))
     content.append(Paragraph(f"Score: {score}", styles['Normal']))
+    content.append(Paragraph(f"Risk: {risk}", styles['Normal']))
     content.append(Paragraph(f"FOIR: {round(foir,2)}", styles['Normal']))
-    content.append(Paragraph(f"Savings Ratio: {round(savings_ratio,2)}", styles['Normal']))
 
     doc.build(content)
 
