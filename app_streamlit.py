@@ -407,31 +407,31 @@ if st.session_state.results is not None:
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
     st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
-        analysis = []
+    analysis = []
         
-        analysis.append(f"Stability Score: {round(r['stability'],2)}")
-        analysis.append(f"Income Frequency: {round(r['frequency'],2)}")
-        analysis.append(f"Cash Flow Score: {round(r['cf'],2)}")
-        analysis.append(f"FOIR: {round(r['foir'],2)}")
-        analysis.append(f"Savings Ratio: {round(r['savings_ratio'],2)}")
+    analysis.append(f"Stability Score: {round(r['stability'],2)}")
+    analysis.append(f"Income Frequency: {round(r['frequency'],2)}")
+    analysis.append(f"Cash Flow Score: {round(r['cf'],2)}")
+    analysis.append(f"FOIR: {round(r['foir'],2)}")
+    analysis.append(f"Savings Ratio: {round(r['savings_ratio'],2)}")
         
-        if r["stability"] < 0.5:
-            analysis.append("Income shows high volatility → repayment risk")
+    if r["stability"] < 0.5:
+        analysis.append("Income shows high volatility → repayment risk")
         
-        if r["frequency"] < 0.5:
-            analysis.append("Income is irregular → inconsistent cash flow")
+    if r["frequency"] < 0.5:
+        analysis.append("Income is irregular → inconsistent cash flow")
         
-        if r["cf"] < 0.4:
-            analysis.append("Cash flow is weak → low financial buffer")
+    if r["cf"] < 0.4:
+        analysis.append("Cash flow is weak → low financial buffer")
         
-        if r["foir"] > 0.6:
-            analysis.append("High financial obligations → stress risk")
+    if r["foir"] > 0.6:
+         analysis.append("High financial obligations → stress risk")
         
-        if r["savings_ratio"] < 0.2:
-            analysis.append("Low savings → vulnerable to shocks")
+    if r["savings_ratio"] < 0.2:
+         analysis.append("Low savings → vulnerable to shocks")
         
-        for line in analysis:
-            st.write("• " + line)
+    for line in analysis:
+        st.write("• " + line)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
