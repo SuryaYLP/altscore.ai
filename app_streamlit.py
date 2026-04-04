@@ -7,7 +7,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 import os
 from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
+if "results" not in st.session_state:
+    st.session_state.results = None
+    
 st.set_page_config(page_title="AltScore AI", layout="wide")
 # ------------------------
 # UI STYLE
@@ -186,7 +188,90 @@ m4.metric("Savings Ratio", round(final_savings_ratio, 2))
 
 # ------------------------
 if st.button("🔍 Check Credit Score"):
+if st.session_state.results is not None:
 
+    r = st.session_state.results
+
+    st.markdown("---")
+    st.markdown("## 📊 Credit Assessment Results")
+
+    # Top Metrics
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Credit Score", r["score"])
+    c2.metric("FOIR", round(r["foir"], 2))
+    c3.metric("Savings Ratio", round(r["savings_ratio"], 2))
+    c4.metric("Eligible Loan", r["loan"])
+
+    st.progress(r["score"] / 900)
+
+    # Monthly Summary
+    st.markdown("### 📊 Monthly Summary")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Income", int(r["total_income"]))
+    m2.metric("Expenses", int(r["total_expenses"]))
+    m3.metric("Savings", int(r["total_savings"]))
+
+    # Underwriting Signals
+    st.markdown("### 🧠 Underwriting Signals")
+    u1, u2, u3 = st.columns(3)
+    u1.metric("Stability", round(r["stability"], 2))
+    u2.metric("Frequency", round(r["frequency"], 2))
+    u3.metric("Cash Flow", round(r["cf"], 2))
+    # ------------------------
+    # CALCULATIONS
+    # ------------------------
+    total_savings = total_income - total_expenses
+    savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+    foir = fixed_obligations / total_income if total_income > 0 else 0
+    stability = max(0, 1 - cv)
+    frequency = min(transactions / 200, 1)
+    cf = max(0, 1 - (total_expenses / total_income)) if total_income > 0 else 0.5
+
+    score = 300
+    score += int(200 * stability)
+    score += int(150 * frequency)
+    score += int(150 * cf)
+    score += int(150 * savings_ratio)
+    score += int(150 * bill_pay)
+
+    if foir < 0.4:
+        score += 100
+    elif foir < 0.6:
+        score += 40
+    else:
+        score -= 100
+
+    score = max(300, min(score, 900))
+
+    # Loan logic
+    if score > 750:
+        loan = "₹2L - ₹5L"
+        rate = "10% - 14%"
+    elif score > 600:
+        loan = "₹50K - ₹2L"
+        rate = "14% - 20%"
+    else:
+        loan = "₹0 - ₹50K"
+        rate = "20%+"
+
+    # ------------------------
+    # STORE EVERYTHING
+    # ------------------------
+    st.session_state.results = {
+        "score": score,
+        "foir": foir,
+        "stability": stability,
+        "frequency": frequency,
+        "cf": cf,
+        "loan": loan,
+        "rate": rate,
+        "savings_ratio": savings_ratio,
+        "total_income": total_income,
+        "total_expenses": total_expenses,
+        "total_savings": total_savings
+    }
     # ALL calculations
     # ALL UI (metrics, graphs, AI, PDF)
 
