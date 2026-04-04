@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import math
 
 st.set_page_config(page_title="AltScore AI", layout="wide")
@@ -8,7 +9,7 @@ st.set_page_config(page_title="AltScore AI", layout="wide")
 # HEADER
 # ------------------------
 st.title("💳 AltScore AI")
-st.caption("AI-powered alternative credit scoring | Built via vibe coding")
+st.caption("Behavioral Credit Underwriting Engine | Stability > Income")
 
 st.markdown("---")
 
@@ -22,21 +23,21 @@ if st.button("🚀 Assess Creditworthiness"):
     st.session_state.started = True
 
 if not st.session_state.started:
-    st.info("Click the button to begin credit assessment")
+    st.info("Click to begin")
     st.stop()
 
 # ------------------------
 # PROFILE
 # ------------------------
 profile = st.selectbox(
-    "Select User Profile",
-    ["Gig Worker", "Salaried", "Student / Informal"]
+    "User Profile",
+    ["Gig Worker", "Salaried", "Informal"]
 )
 
 st.markdown("---")
 
 # ------------------------
-# LAYOUT
+# INPUTS
 # ------------------------
 col1, col2 = st.columns(2)
 
@@ -44,88 +45,124 @@ with col1:
     st.markdown("### 📊 Behavioral Inputs")
 
     transactions = st.slider("Monthly Transactions", 0, 300, 100)
-    recharge = st.slider("Recharge Frequency", 0, 20, 5)
-    location = st.slider("Location Stability", 0.0, 1.0, 0.5)
-
-    p2p = st.slider("Peer-to-Peer Transfers (UPI)", 0, 100, 20)
-    bill_pay = st.slider("Bill Payment Consistency", 0.0, 1.0, 0.6)
     savings = st.slider("Savings Ratio", 0.0, 1.0, 0.2)
+    bill_pay = st.slider("Bill Payment Consistency", 0.0, 1.0, 0.6)
 
 with col2:
     st.markdown("### 💰 Financial Inputs")
 
-    cash_in = st.number_input("Monthly Cash Inflow (₹)", 0, 200000, 30000)
-    cash_out = st.number_input("Monthly Cash Outflow (₹)", 0, 200000, 25000)
-    obligations = st.number_input("Monthly Fixed Obligations (EMIs, Rent) (₹)", 0, 200000, 10000)
+    cash_in = st.number_input("Monthly Income (₹)", 0, 200000, 30000)
+    cash_out = st.number_input("Monthly Expenses (₹)", 0, 200000, 25000)
+    obligations = st.number_input("Fixed Obligations (₹)", 0, 200000, 10000)
 
     st.markdown("### 📂 Upload Bank Statement")
-
-    uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
-
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-
-        st.dataframe(df.head(), height=150)
-
-        if "amount" in df.columns:
-            cash_in = df[df["amount"] > 0]["amount"].sum()
-            cash_out = abs(df[df["amount"] < 0]["amount"].sum())
-
-            st.success(f"Inflow detected: ₹{int(cash_in)}")
-            st.success(f"Outflow detected: ₹{int(cash_out)}")
+    uploaded_file = st.file_uploader("CSV", type=["csv"])
 
 # ------------------------
-# FOIR CALCULATION
+# FEATURE EXTRACTION FROM CSV
 # ------------------------
-if cash_in > 0:
-    foir = obligations / cash_in
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+    if "amount" in df.columns and "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.sort_values("date")
+
+        credits = df[df["amount"] > 0]["amount"]
+        debits = df[df["amount"] < 0]["amount"]
+
+        # Income stats
+        income_total = credits.sum()
+        income_mean = credits.mean() if len(credits) > 0 else 0
+        income_std = credits.std() if len(credits) > 0 else 0
+
+        # Volatility (CV)
+        if income_mean > 0:
+            cv = income_std / income_mean
+        else:
+            cv = 1
+
+        # Frequency
+        credit_dates = df[df["amount"] > 0]["date"]
+        if len(credit_dates) > 1:
+            gaps = credit_dates.diff().dt.days.dropna()
+            avg_gap = gaps.mean()
+            max_gap = gaps.max()
+        else:
+            avg_gap = 30
+            max_gap = 30
+
+        # Cash flow
+        inflow = credits.sum()
+        outflow = abs(debits.sum())
+
+        # Override inputs
+        cash_in = inflow
+        cash_out = outflow
+
+        st.success(f"Income detected: ₹{int(cash_in)}")
+        st.success(f"Expenses detected: ₹{int(cash_out)}")
+
+    else:
+        st.error("CSV must contain 'date' and 'amount' columns")
+        cv = 1
+        avg_gap = 30
+        max_gap = 30
 else:
-    foir = 0
+    cv = 0.3
+    avg_gap = 10
+    max_gap = 20
 
 # ------------------------
-# SCORING (ML-LIKE)
+# FOIR
 # ------------------------
-score = 300
+foir = obligations / cash_in if cash_in > 0 else 0
 
-t_norm = min(transactions / 200, 1)
-r_norm = min(recharge / 10, 1)
-l_norm = location
-s_norm = savings
-b_norm = bill_pay
-p_norm = min(p2p / 50, 1)
+# ------------------------
+# FEATURE ENGINEERING
+# ------------------------
 
+# Stability score (LOW CV = GOOD)
+stability_score = max(0, 1 - cv)
+
+# Frequency score (LOW GAP = GOOD)
+frequency_score = max(0, 1 - (avg_gap / 30))
+
+# Cash flow health
 if cash_in > 0:
     cf_ratio = cash_out / cash_in
     cf_score = max(0, 1 - cf_ratio)
 else:
     cf_score = 0.5
 
-score += int(150 * t_norm)
-score += int(100 * r_norm)
-score += int(150 * l_norm)
-score += int(150 * s_norm)
-score += int(150 * b_norm)
-score += int(100 * p_norm)
-score += int(150 * cf_score)
+# ------------------------
+# SCORING ENGINE
+# ------------------------
+score = 300
 
-# FOIR IMPACT
+score += int(200 * stability_score)
+score += int(150 * frequency_score)
+score += int(150 * cf_score)
+score += int(150 * savings)
+score += int(150 * bill_pay)
+
+# FOIR
 if foir < 0.4:
     score += 100
 elif foir < 0.6:
     score += 40
 else:
+    score -= 100
+
+# Volatility penalty
+if cv > 0.5:
+    score -= 100
+
+# Gap penalty
+if max_gap > 20:
     score -= 80
 
-# Non-linear penalty
-if cash_out > cash_in:
-    score -= int(100 * math.log(cash_out - cash_in + 1))
-
-# Profile adjustment
-if profile == "Gig Worker":
-    score += 10
-elif profile == "Student / Informal":
-    score -= 10
-
+# Clamp
 score = max(300, min(score, 900))
 
 # ------------------------
@@ -143,123 +180,64 @@ st.markdown("---")
 # ------------------------
 # RESULTS
 # ------------------------
-r1, r2, r3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
 
-r1.metric("💳 Credit Score", score)
-r2.metric("⚠️ Risk Level", risk)
-
-if score > 750:
-    loan = "₹2L - ₹5L"
-    rate = "10% - 14%"
-elif score > 600:
-    loan = "₹50K - ₹2L"
-    rate = "14% - 20%"
-else:
-    loan = "₹0 - ₹50K"
-    rate = "20%+"
-
-r3.metric("💰 Loan Range", loan)
+c1.metric("Credit Score", score)
+c2.metric("Risk Level", risk)
+c3.metric("FOIR", round(foir, 2))
 
 st.progress(score / 900)
 
 # ------------------------
-# FOIR DISPLAY
+# UNDERWRITING DASHBOARD
 # ------------------------
-st.markdown(f"### 📉 FOIR: {round(foir, 2)}")
+st.markdown("### 🧠 Underwriting Signals")
 
-if foir < 0.4:
-    st.success("Healthy obligation ratio")
-elif foir < 0.6:
-    st.warning("Moderate financial burden")
-else:
-    st.error("High financial stress")
+d1, d2, d3 = st.columns(3)
 
-# ------------------------
-# BREAKDOWN + ANALYSIS
-# ------------------------
-c1, c2 = st.columns(2)
-
-with c1:
-    st.markdown("### 📊 Score Breakdown")
-    st.write("Transactions:", int(150 * t_norm))
-    st.write("Savings:", int(150 * s_norm))
-    st.write("Bill Discipline:", int(150 * b_norm))
-    st.write("Cash Flow Score:", round(cf_score, 2))
-    st.write("FOIR:", round(foir, 2))
-
-with c2:
-    st.markdown("### 🧠 AI Analysis")
-
-    analysis = f"""
-Profile: {profile}
-
-Cash Flow Ratio: {round(cash_out / cash_in, 2) if cash_in > 0 else "N/A"}
-FOIR: {round(foir, 2)}
-
-Observations:
-"""
-
-    if cash_out > cash_in:
-        analysis += "\n- Spending exceeds income"
-    else:
-        analysis += "\n- Healthy cash flow"
-
-    if savings < 0.2:
-        analysis += "\n- Low savings buffer"
-
-    if bill_pay > 0.7:
-        analysis += "\n- Strong repayment discipline"
-
-    if foir > 0.6:
-        analysis += "\n- High fixed obligations"
-
-    st.code(analysis)
+d1.metric("Stability Score", round(stability_score, 2))
+d2.metric("Income Frequency", round(frequency_score, 2))
+d3.metric("Cash Flow Score", round(cf_score, 2))
 
 # ------------------------
-# PERSONALIZATION
-# ------------------------
-st.markdown("### 🎯 Personalized Insight")
-
-if profile == "Gig Worker":
-    st.info("Income variability considered — consistency improves score")
-elif profile == "Salaried":
-    st.info("Stable income boosts your credit profile")
-else:
-    st.info("Improving discipline will unlock credit access")
-
-# ------------------------
-# RISK SIGNALS
+# RISK FLAGS
 # ------------------------
 st.markdown("### 🚨 Risk Signals")
 
-if transactions > 250 and savings < 0.1:
-    st.warning("High transactions + low savings")
+if cv > 0.5:
+    st.warning("High income volatility detected")
 
-if cash_in == 0:
-    st.error("No income detected")
+if max_gap > 20:
+    st.warning("Irregular income gaps detected")
+
+if foir > 0.6:
+    st.error("High debt burden")
+
+if cash_out > cash_in:
+    st.error("Negative cash flow")
 
 # ------------------------
-# DOWNLOAD
+# AI ANALYSIS (SIMULATED)
 # ------------------------
-report = f"""
-AltScore Report
+st.markdown("### 🤖 AI Analysis")
 
-Score: {score}
-Risk: {risk}
-Loan: {loan}
-Rate: {rate}
-FOIR: {round(foir, 2)}
+analysis = f"""
+This borrower shows a stability score of {round(stability_score,2)} and income volatility (CV) of {round(cv,2)}.
+
+Income consistency is {'strong' if frequency_score > 0.6 else 'weak'}, with average gaps of {int(avg_gap)} days.
+
+FOIR is {round(foir,2)}, indicating {'low' if foir < 0.4 else 'high'} financial stress.
+
+Overall risk is classified as {risk}.
 """
 
-st.download_button("📄 Download Report", report)
+st.code(analysis)
 
 # ------------------------
 # FOOTER
 # ------------------------
 st.markdown("---")
+st.caption("Prototype underwriting engine using behavioral financial signals")
 
-st.caption("🔒 Data is simulated. Production systems would use secure pipelines.")
-
-# RESET
 if st.button("🔄 Reset"):
     st.session_state.started = False
