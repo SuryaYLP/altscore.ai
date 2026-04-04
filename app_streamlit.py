@@ -128,12 +128,20 @@ total_savings = total_income - total_expenses
 # ------------------------
 st.markdown("---")
 st.markdown("## 📊 Behavioral Signals")
+st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, user can adjust manually.")
 
 transactions = st.slider("Transactions", 0, 300, 100)
+st.caption("Number of financial transactions. Higher = more active financial behavior.")
 savings = st.slider("Savings ratio", 0.0, 1.0, 0.2)
+st.caption("Savings Ratio = Monthly Savings / Monthly Income. Higher ratio indicates better financial discipline.")
 bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
-p2p = st.slider("UPI transfers", 0, 100, 20)
+st.caption("Measures how consistently bills are paid. Higher = more reliable borrower.")
+upi = st.slider("UPI based transactions in a month", 0, 500, 20)
+st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
+p2p = st.slider("P2P transfers in a month", 0, 100, 20)
+st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
+st.caption("Indicates how stable the user's location is. Higher stability reduces default risk.")
 
 # ------------------------
 # RESULT BUTTON
@@ -142,6 +150,7 @@ location = st.slider("Location stability", 0.0, 1.0, 0.7)
 # MONTHLY SUMMARY (NEW)
 # ------------------------
 total_savings = total_income - total_expenses
+savings = final_savings_ratio
 calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
 
 # If user has moved slider, use that, else fallback
