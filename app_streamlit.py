@@ -187,6 +187,9 @@ m4.metric("Savings Ratio", round(final_savings_ratio, 2))
 # ------------------------
 if st.button("🔍 Check Credit Score"):
 
+    # ALL calculations
+    # ALL UI (metrics, graphs, AI, PDF)
+
     # ------------------------
     # FEATURE ENGINEERING
     # ------------------------
@@ -222,6 +225,8 @@ if st.button("🔍 Check Credit Score"):
     # ------------------------
     # RISK
     # ------------------------
+    if score is not None:
+
     if score > 750:
         risk = "Low"
         st.success("Low Risk")
