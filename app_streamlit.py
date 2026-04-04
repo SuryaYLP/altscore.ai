@@ -372,10 +372,8 @@ with st.spinner("AI is analyzing borrower profile..."):
 
             st.markdown(response.choices[0].message.content)
 
-        except:
-            st.warning("AI analysis unavailable")
-            
-        st.markdown('</div>', unsafe_allow_html=True)
+        except Exception as e:            
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # ------------------------
     # CONFIDENCE SCORE
@@ -405,29 +403,29 @@ with st.spinner("AI is analyzing borrower profile..."):
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
         st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
-
         analysis = []
-
-        if r["stability"] > 0.7:
-            analysis.append("Income stability is strong.")
-        else:
-            analysis.append("Income shows volatility.")
-
-        if r["frequency"] > 0.6:
-            analysis.append("Income frequency is consistent.")
-        else:
-            analysis.append("Income is irregular.")
-
-        if r["cf"] > 0.5:
-            analysis.append("Cash flow is healthy.")
-        else:
-            analysis.append("Cash flow is constrained.")
-
-        if r["foir"] < 0.4:
-            analysis.append("Low financial stress.")
-        else:
-            analysis.append("High financial obligations.")
-
+        
+        analysis.append(f"Stability Score: {round(r['stability'],2)}")
+        analysis.append(f"Income Frequency: {round(r['frequency'],2)}")
+        analysis.append(f"Cash Flow Score: {round(r['cf'],2)}")
+        analysis.append(f"FOIR: {round(r['foir'],2)}")
+        analysis.append(f"Savings Ratio: {round(r['savings_ratio'],2)}")
+        
+        if r["stability"] < 0.5:
+            analysis.append("Income shows high volatility → repayment risk")
+        
+        if r["frequency"] < 0.5:
+            analysis.append("Income is irregular → inconsistent cash flow")
+        
+        if r["cf"] < 0.4:
+            analysis.append("Cash flow is weak → low financial buffer")
+        
+        if r["foir"] > 0.6:
+            analysis.append("High financial obligations → stress risk")
+        
+        if r["savings_ratio"] < 0.2:
+            analysis.append("Low savings → vulnerable to shocks")
+        
         for line in analysis:
             st.write("• " + line)
 
@@ -436,20 +434,26 @@ with st.spinner("AI is analyzing borrower profile..."):
     # ------------------------
     # PDF DOWNLOAD
     # ------------------------
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import Table, TableStyle
+        from reportlab.lib import colors
 
-        doc = SimpleDocTemplate("report.pdf")
-        styles = getSampleStyleSheet()
-    
-        content = []
-        content.append(Paragraph("AltScore Report", styles['Title']))
-        content.append(Spacer(1, 12))
-        content.append(Paragraph(f"Score: {r['score']}", styles['Normal']))
-        content.append(Paragraph(f"Risk: {risk}", styles['Normal']))
-        content.append(Paragraph(f"FOIR: {round(r['foir'],2)}", styles['Normal']))
-    
-        doc.build(content)
+        data = [
+            ["Metric", "Value"],
+            ["Score", r["score"]],
+            ["FOIR", round(r["foir"],2)],
+            ["Savings Ratio", round(r["savings_ratio"],2)],
+            ["Income", r["total_income"]],
+            ["Expenses", r["total_expenses"]],
+        ]
+        
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.blue),
+            ('TEXTCOLOR',(0,0),(-1,0),colors.white),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ]))
+        
+        content.append(table)
     
         with open("report.pdf", "rb") as f:
             st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
