@@ -53,41 +53,48 @@ if profile == "Gig Worker":
 
     sub_profile = st.selectbox(
         "Select Category",
-        ["Delivery Agent", "Driver Partner", "Service Professional"]
+        ["Delivery Agent", "Driver Partner", "Service Professional", "Blue Collar / Others"]
     )
 
     # ---------------- DELIVERY ----------------
     if sub_profile == "Delivery Agent":
-        primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 20000)
-        cv = st.slider("Earnings volatility (CV)", 0.0, 1.0, 0.3)
-        tenure = st.slider("Platform tenure (months)", 0, 60, 12)
-        completion = st.slider("Order completion rate", 0.0, 1.0, 0.9)
-        seasonality = st.slider("Income seasonality", 0.0, 1.0, 0.3)
-        rating_trend = st.slider("Rating trend", -1.0, 1.0, 0.2)
-        active_days = st.slider("Active days/month", 0, 30, 20)
+        primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 15000)
+        cv = st.slider("Earnings volatility / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
+        tenure = st.slider("Platform tenure (months)", 0, 60, 42)
+        completion = st.slider("Order completion rate: 1-All orders fulfilled", 0.0, 1.0, 0.9)
+        seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
+        rating_trend = st.slider("Rating trend: 0-Lowest Rating, 1-Highest Rating", 0, 1.0, 0.2)
+        active_days = st.slider("Active days per month", 0, 30, 22)
 
     # ---------------- DRIVER ----------------
     elif sub_profile == "Driver Partner":
         primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 25000)
-        weekly_trend = st.slider("Weekly earnings trend", -1.0, 1.0, 0.1)
-        cancel_rate = st.slider("Cancellation rate", 0.0, 1.0, 0.1)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
+        weekly_trend = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -1.0, 1.0, 0.5)
+        cancel_rate = st.slider("Ride aancellation rate", 0.0, 1.0, 0.1)
         tenure = st.slider("Platform tenure (months)", 0, 60, 18)
-        rating = st.slider("Driver rating", 1.0, 5.0, 4.5)
-        acceptance = st.slider("Acceptance rate", 0.0, 1.0, 0.8)
+        rating = st.slider("Driver rating: 0-Lowest Rating, 5-Highest Rating", 1.0, 5.0, 4.5)
+        acceptance = st.slider("Ride acceptance rate: 1-All rides are accepted", 0.0, 1.0, 0.8)
         ownership = st.selectbox("Vehicle ownership", ["Owned", "EMI", "Rented"])
         surge = st.slider("Surge participation", 0.0, 1.0, 0.5)
-        cv = 0.3
 
     # ---------------- SERVICE ----------------
     elif sub_profile == "Service Professional":
         primary_income = st.number_input("Monthly revenue (₹)", 0, 200000, 40000)
         completion = st.slider("Job completion rate", 0.0, 1.0, 0.9)
         repeat = st.slider("Repeat customer rate", 0.0, 1.0, 0.5)
-        growth = st.slider("Revenue growth", -0.5, 1.0, 0.1)
-        rating_volume = st.slider("Rating × volume", 0.0, 1.0, 0.7)
-        upskilling = st.slider("Certification level", 0.0, 1.0, 0.6)
-        breadth = st.slider("Category breadth", 0.0, 1.0, 0.5)
-        cv = 0.2
+        growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
+        rating_volume = st.slider("Avg. rating in the last 4 weeks", 0.0, 1.0, 0.7)
+        upskilling = st.slider("Certification level: 0-No upskilling in the last 1 year", 0.0, 1.0, 0.6)
+        breadth = st.slider("Category breadth: 0.1 increment for every category ", 0.0, 1.0, 0.5)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
+
+    # ---------------- BLUE COLLAR / OTHERS ----------------
+    elif sub_profile == "Blue Collar / Others":
+        primary_income = st.number_input("Monthly revenue (₹)", 0, 200000, 40000)
+        growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
+        seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
 
     # ---------------- CROSS PLATFORM ----------------
     st.markdown("### 🌐 Cross Platform Signals")
