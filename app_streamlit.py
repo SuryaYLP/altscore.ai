@@ -63,7 +63,7 @@ if profile == "Gig Worker":
         tenure = st.slider("Platform tenure (months)", 0, 60, 42)
         completion = st.slider("Order completion rate: 1-All orders fulfilled", 0.0, 1.0, 0.9)
         seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
-        rating_trend = st.slider("Rating trend: 0-Lowest Rating, 1-Highest Rating", 0, 1.0, 0.2)
+        rating_trend = st.slider("Rating trend: 0-Lowest Rating, 1-Highest Rating", 0.0, 1.0, 0.2)
         active_days = st.slider("Active days per month", 0, 30, 22)
 
     # ---------------- DRIVER ----------------
@@ -102,7 +102,7 @@ if profile == "Gig Worker":
     secondary_income = st.number_input("Income from other platforms (₹)", 0, 200000, 10000)
     platform_count = st.slider("Number of platforms", 1, 5, 2)
     active_months = st.slider("Consecutive active months", 0, 60, 12)
-    yoy_growth = st.slider("YoY growth", -50, 100, 10)
+    yoy_growth = st.slider("YoY growth across all platforms", -50, 100, 10)
     reconciliation = st.slider("Income reconciliation score", 0.0, 1.0, 0.8)
 
     total_income = primary_income + secondary_income
