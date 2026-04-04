@@ -188,36 +188,6 @@ m4.metric("Savings Ratio", round(final_savings_ratio, 2))
 
 # ------------------------
 if st.button("🔍 Check Credit Score"):
-if st.session_state.results is not None:
-
-    r = st.session_state.results
-
-    st.markdown("---")
-    st.markdown("## 📊 Credit Assessment Results")
-
-    # Top Metrics
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric("Credit Score", r["score"])
-    c2.metric("FOIR", round(r["foir"], 2))
-    c3.metric("Savings Ratio", round(r["savings_ratio"], 2))
-    c4.metric("Eligible Loan", r["loan"])
-
-    st.progress(r["score"] / 900)
-
-    # Monthly Summary
-    st.markdown("### 📊 Monthly Summary")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Income", int(r["total_income"]))
-    m2.metric("Expenses", int(r["total_expenses"]))
-    m3.metric("Savings", int(r["total_savings"]))
-
-    # Underwriting Signals
-    st.markdown("### 🧠 Underwriting Signals")
-    u1, u2, u3 = st.columns(3)
-    u1.metric("Stability", round(r["stability"], 2))
-    u2.metric("Frequency", round(r["frequency"], 2))
-    u3.metric("Cash Flow", round(r["cf"], 2))
     # ------------------------
     # CALCULATIONS
     # ------------------------
@@ -272,6 +242,38 @@ if st.session_state.results is not None:
         "total_expenses": total_expenses,
         "total_savings": total_savings
     }
+if st.session_state.results is not None:
+
+    r = st.session_state.results
+
+    st.markdown("---")
+    st.markdown("## 📊 Credit Assessment Results")
+
+    # Top Metrics
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Credit Score", r["score"])
+    c2.metric("FOIR", round(r["foir"], 2))
+    c3.metric("Savings Ratio", round(r["savings_ratio"], 2))
+    c4.metric("Eligible Loan", r["loan"])
+
+    st.progress(r["score"] / 900)
+
+    # Monthly Summary
+    st.markdown("### 📊 Monthly Summary")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Income", int(r["total_income"]))
+    m2.metric("Expenses", int(r["total_expenses"]))
+    m3.metric("Savings", int(r["total_savings"]))
+
+    # Underwriting Signals
+    st.markdown("### 🧠 Underwriting Signals")
+    u1, u2, u3 = st.columns(3)
+    u1.metric("Stability", round(r["stability"], 2))
+    u2.metric("Frequency", round(r["frequency"], 2))
+    u3.metric("Cash Flow", round(r["cf"], 2))
+
+    
     # ALL calculations
     # ALL UI (metrics, graphs, AI, PDF)
 
