@@ -11,7 +11,6 @@ if "results" not in st.session_state:
     st.session_state.results = None
     
 st.set_page_config(page_title="AltScore AI", layout="wide")
-st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # UI STYLE
 # ------------------------
@@ -26,8 +25,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # HEADER
 # ------------------------
