@@ -406,7 +406,7 @@ if st.session_state.results is not None:
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
-    st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
+    st.markdown("### 🤖 AltScore AI Credit Analysis (Rule-Based)")
     analysis = []
         
     analysis.append(f"Stability Score: {round(r['stability'],2)}")
@@ -438,26 +438,41 @@ if st.session_state.results is not None:
     # ------------------------
     # PDF DOWNLOAD
     # ------------------------
-    from reportlab.platypus import Table, TableStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
     from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet
 
+    doc = SimpleDocTemplate("report.pdf")
+    styles = getSampleStyleSheet()
+    
+    content = []  # ✅ FIX
+    
+    # Title
+    content.append(Paragraph("AltScore Credit Report", styles['Title']))
+    content.append(Spacer(1, 12))
+    
+    # Table data
     data = [
         ["Metric", "Value"],
         ["Score", r["score"]],
-        ["FOIR", round(r["foir"],2)],
-        ["Savings Ratio", round(r["savings_ratio"],2)],
+        ["FOIR", round(r["foir"], 2)],
+        ["Savings Ratio", round(r["savings_ratio"], 2)],
         ["Income", r["total_income"]],
         ["Expenses", r["total_expenses"]],
+        ["Savings", r["total_savings"]],
     ]
-        
+    
     table = Table(data)
+    
     table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.blue),
         ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-        ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
     ]))
-        
+    
     content.append(table)
+    
+    doc.build(content)
     
     with open("report.pdf", "rb") as f:
         st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
