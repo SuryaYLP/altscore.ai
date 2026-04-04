@@ -661,22 +661,6 @@ if st.session_state.results is not None:
     # BORDER (THIN + CLEAN)
     # ------------------------
    
-    
-    from reportlab.pdfgen import canvas
-    def draw_border(canvas, doc):
-        canvas.saveState()
-    
-        canvas.setStrokeColor(colors.HexColor("#1f4e79"))
-        canvas.setLineWidth(0.8)  # thin, clean
-    
-    # Use margins to position border
-    x = doc.leftMargin - 10
-    y = doc.bottomMargin - 10
-    width = doc.width + 20
-    height = doc.height + 20
-    
         
-    
-    
     with open("report.pdf", "rb") as f:
         st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
