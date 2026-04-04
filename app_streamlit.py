@@ -147,7 +147,7 @@ st.caption("Indicates how stable the user's location is. Higher stability reduce
 # RESULT BUTTON
 # ------------------------
 # ------------------------
-# MONTHLY SUMMARY (NEW)
+# MONTHLY SUMMARY
 # ------------------------
 total_savings = total_income - total_expenses
 savings = final_savings_ratio
@@ -214,34 +214,162 @@ if st.button("🔍 Check Credit Score"):
         st.error("High Risk")
 
     # ------------------------
-    # RESULTS
-    # ------------------------
-    st.markdown("---")
-    st.markdown("## 📊 Check Credit Score")
+# RESULTS SECTION (ENHANCED UI)
+# ------------------------
+st.markdown("---")
+st.markdown("## 📊 Credit Assessment Results")
 
-    st.metric("Score", score)
-    st.metric("FOIR", round(foir, 2))
+# Top Metrics
+r1, r2, r3, r4 = st.columns(4)
 
-    # ------------------------
-    # UNDERWRITING SIGNALS
-    # ------------------------
-    st.markdown("### 🧠 Underwriting Signals")
-    st.write("Stability Score:", round(stability,2))
-    st.write("Income Frequency:", round(frequency,2))
-    st.write("Cash Flow Score:", round(cf,2))
+r1.metric("Credit Score", score)
+r2.metric("FOIR", round(foir, 2))
+r3.metric("Savings Ratio", round(savings, 2))
 
-    # ------------------------
-    # AI ANALYSIS
-    # ------------------------
-    st.markdown("### 🤖 Detailed AI Analysis")
+# Loan eligibility (added back)
+if score > 750:
+    loan = "₹2L - ₹5L"
+    rate = "10% - 14%"
+elif score > 600:
+    loan = "₹50K - ₹2L"
+    rate = "14% - 20%"
+else:
+    loan = "₹0 - ₹50K"
+    rate = "20%+"
 
-    st.write(f"""
-    This borrower shows a stability score of {round(stability,2)} and income volatility (CV) of {round(cv,2)}.
-    Income consistency is {'strong' if frequency > 0.6 else 'weak'}.
-    FOIR is {round(foir,2)}, indicating {'low' if foir < 0.4 else 'high'} financial stress.
-    Overall risk is classified as {risk}.
-    """)
+r4.metric("Eligible Loan", loan)
 
+st.progress(score / 900)
+
+# ------------------------
+# UNDERWRITING SIGNALS
+# ------------------------
+st.markdown("### 🧠 Underwriting Signals")
+
+u1, u2, u3 = st.columns(3)
+
+u1.metric("Stability Score", round(stability, 2))
+u2.metric("Income Frequency", round(frequency, 2))
+u3.metric("Cash Flow Score", round(cf, 2))
+
+# ------------------------
+# RISK SIGNALS
+# ------------------------
+st.markdown("### 🚨 Risk Signals")
+
+if cv > 0.5:
+    st.error("High income volatility detected")
+
+if foir > 0.6:
+    st.error("High debt burden")
+
+if cf < 0.3:
+    st.warning("Weak cash flow position")
+
+if stability > 0.7:
+    st.success("Stable income behavior")
+
+# ------------------------
+# INTERACTIVE VISUALS
+# ------------------------
+st.markdown("### 📈 Financial Insights")
+
+import plotly.express as px
+import pandas as pd
+
+# Financial Breakdown Chart
+finance_df = pd.DataFrame({
+    "Category": ["Income", "Expenses", "Savings"],
+    "Amount": [total_income, total_expenses, total_income - total_expenses]
+})
+
+fig1 = px.bar(
+    finance_df,
+    x="Category",
+    y="Amount",
+    color="Category",
+    text="Amount",
+    title="Income vs Expenses vs Savings"
+)
+
+fig1.update_layout(showlegend=False)
+st.plotly_chart(fig1, use_container_width=True)
+
+# Score Components Radar Chart
+score_df = pd.DataFrame({
+    "Metric": ["Stability", "Frequency", "Cash Flow", "Savings"],
+    "Value": [stability, frequency, cf, savings]
+})
+
+fig2 = px.line_polar(
+    score_df,
+    r="Value",
+    theta="Metric",
+    line_close=True,
+    title="Behavioral Score Profile"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+# ------------------------
+# ADVANCED AI ANALYSIS
+# ------------------------
+st.markdown("### 🤖 AI Credit Analysis")
+
+analysis = []
+
+# Stability
+if stability > 0.7:
+    analysis.append(f"Income stability is strong (score: {round(stability,2)}), indicating predictable earnings behavior.")
+else:
+    analysis.append(f"Income shows volatility (CV: {round(cv,2)}), which may impact repayment consistency.")
+
+# Frequency
+if frequency > 0.6:
+    analysis.append("Income frequency is consistent, suggesting steady earning patterns.")
+else:
+    analysis.append("Income inflow is irregular, indicating potential gaps in earnings.")
+
+# Cash Flow
+if cf > 0.5:
+    analysis.append("Cash flow position is healthy, with sufficient surplus after expenses.")
+else:
+    analysis.append("Cash flow is constrained, indicating limited financial buffer.")
+
+# FOIR
+if foir < 0.4:
+    analysis.append(f"FOIR is {round(foir,2)}, reflecting low financial stress and strong repayment capacity.")
+else:
+    analysis.append(f"FOIR is {round(foir,2)}, indicating elevated financial obligations relative to income.")
+
+# Behavioral Layer
+if savings > 0.3:
+    analysis.append("Savings behavior is strong, reinforcing financial discipline.")
+else:
+    analysis.append("Savings buffer is limited, increasing vulnerability to income shocks.")
+
+# Final Recommendation
+if score > 750:
+    recommendation = "Borrower is highly creditworthy and eligible for premium lending products."
+elif score > 600:
+    recommendation = "Borrower is moderately creditworthy. Controlled exposure recommended."
+else:
+    recommendation = "Borrower is high risk. Lending should be cautious or limited."
+
+# Display output like real AI
+for line in analysis:
+    st.write("• " + line)
+
+st.markdown("---")
+st.markdown("### 📌 Recommendation")
+
+if score > 750:
+    st.success(recommendation)
+elif score > 600:
+    st.warning(recommendation)
+else:
+    st.error(recommendation)
+    
     # ------------------------
     # PDF
     # ------------------------
