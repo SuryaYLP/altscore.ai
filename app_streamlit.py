@@ -99,16 +99,16 @@ if profile == "Gig Worker":
     # ---------------- CROSS PLATFORM ----------------
     st.markdown("### 🌐 Cross Platform Signals")
 
-    secondary_income = st.number_input("Income from other platforms (₹)", 0, 200000, 10000)
+    secondary_income = st.number_input("Monthly income from other platforms (₹)", 0, 200000, 10000)
     platform_count = st.slider("Number of platforms", 1, 5, 2)
     active_months = st.slider("Consecutive active months", 0, 60, 12)
     yoy_growth = st.slider("YoY growth across all platforms", -50, 100, 10)
     reconciliation = st.slider("Income reconciliation score", 0.0, 1.0, 0.8)
 
-    total_income = primary_income + secondary_income
+    total_income = (primary_income + secondary_income)*12
 
 else:
-    total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)
+    total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)*12
     cv = 0.3
 
 # ------------------------
