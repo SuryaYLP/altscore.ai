@@ -277,8 +277,8 @@ if score is not None:
         st.error("High Risk")
 r4.metric("Eligible Loan", loan)
 
-st.progress(score / 900)
-
+if score is not None:
+    st.progress(score / 900)
 # ------------------------
 # UNDERWRITING SIGNALS
 # ------------------------
