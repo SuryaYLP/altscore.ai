@@ -152,6 +152,17 @@ st.caption("Indicates how stable the user's location is. Higher stability reduce
 # MONTHLY SUMMARY
 # ------------------------
 total_savings = total_income - total_expenses
+# ------------------------
+# FIX: Define savings ratio
+# ------------------------
+total_savings = total_income - total_expenses
+calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+# If user changed slider use that, else fallback
+try:
+    final_savings_ratio = savings if savings > 0 else calc_savings_ratio
+except:
+    final_savings_ratio = calc_savings_ratio
 savings = final_savings_ratio
 calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
 
