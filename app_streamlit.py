@@ -105,10 +105,10 @@ if profile == "Gig Worker":
     yoy_growth = st.slider("YoY growth across all platforms", -50, 100, 10)
     reconciliation = st.slider("Income reconciliation score", 0.0, 1.0, 0.8)
 
-    total_income = (primary_income + secondary_income)*12
+    total_income = primary_income + secondary_income
 
 else:
-    total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)*12
+    total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)
     cv = 0.3
 
 # ------------------------
@@ -117,10 +117,11 @@ else:
 st.markdown("---")
 st.markdown("## 💰 Expenses")
 
-fixed_obligations = st.number_input("Fixed obligations (EMI, rent)", 0, 200000, 10000)
-other_expenses = st.number_input("Other expenses", 0, 200000, 15000)
+fixed_obligations = st.number_input("Fixed obligations per month (EMI, rent)", 0, 200000, 10000)
+other_expenses = st.number_input("Other expenses per month", 0, 200000, 15000)
 
 total_expenses = fixed_obligations + other_expenses
+total_savings = total_income - total_expenses
 
 # ------------------------
 # BEHAVIORAL
