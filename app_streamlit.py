@@ -439,6 +439,7 @@ if st.session_state.results is not None:
     # PDF DOWNLOAD
     # ------------------------
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import inch
@@ -447,20 +448,22 @@ if st.session_state.results is not None:
     doc = SimpleDocTemplate("report.pdf")
     styles = getSampleStyleSheet()
     
-    # Custom styles
-    title_style = ParagraphStyle(
-        'title',
+    # ------------------------
+    # CUSTOM STYLES
+    # ------------------------
+    logo_style = ParagraphStyle(
+        'logo',
         parent=styles['Title'],
+        fontSize=26,
         textColor=colors.HexColor("#1f4e79"),
-        fontSize=20,
-        spaceAfter=10
+        spaceAfter=6
     )
     
-    header_style = ParagraphStyle(
-        'header',
+    title_style = ParagraphStyle(
+        'title',
         parent=styles['Heading2'],
-        textColor=colors.HexColor("#1f4e79"),
-        spaceAfter=8
+        fontSize=16,
+        textColor=colors.black
     )
     
     small_style = ParagraphStyle(
@@ -473,19 +476,24 @@ if st.session_state.results is not None:
     content = []
     
     # ------------------------
-    # HEADER
+    # HEADER (FIXED ALIGNMENT)
     # ------------------------
-    left_header = [
-        Paragraph("<b>AltScore.AI</b>", title_style),
-        Paragraph(datetime.now().strftime("%d %B %Y, %I:%M %p"), styles['Normal'])
-    ]
+    header_table = Table([
+        [
+            Paragraph("<b>AltScore.AI</b>", logo_style),
+            Paragraph("<b>Credit Rating Report</b>", title_style)
+        ],
+        [
+            Paragraph(datetime.now().strftime("%d %B %Y, %I:%M %p"), styles['Normal']),
+            Paragraph("Indicative report. Not a credit bureau score.", small_style)
+        ]
+    ], colWidths=[3*inch, 3*inch])
     
-    right_header = [
-        Paragraph("<b>AltScore AI Credit Rating Report</b>", header_style),
-        Paragraph("Indicative report. Not a credit bureau score. Data is user-provided and model-derived.", small_style)
-    ]
+    header_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('ALIGN', (1,0), (1,0), 'RIGHT'),
+    ]))
     
-    header_table = Table([[left_header, right_header]], colWidths=[3*inch, 3*inch])
     content.append(header_table)
     content.append(Spacer(1, 12))
     
@@ -493,49 +501,57 @@ if st.session_state.results is not None:
     content.append(Paragraph("<hr width='100%'/>", styles['Normal']))
     
     # ------------------------
-    # CREDIT SUMMARY
+    # CREDIT SUMMARY (₹ FIX)
     # ------------------------
-    content.append(Paragraph("Credit Assessment Results", header_style))
+    content.append(Paragraph("Credit Assessment Results", title_style))
     
     summary_data = [
+        ["Metric", "Value"],
         ["Credit Score", r["score"]],
         ["FOIR", round(r["foir"],2)],
         ["Savings Ratio", round(r["savings_ratio"],2)],
         ["Eligible Loan", r["loan"]],
     ]
     
-    summary_table = Table(summary_data, colWidths=[2.5*inch, 3.5*inch])
+    summary_table = Table(summary_data, colWidths=[3*inch, 3*inch])
     summary_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.lightblue),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
     ]))
+    
     content.append(summary_table)
     content.append(Spacer(1, 12))
     
-    # Divider
-    content.append(Paragraph("<hr width='100%'/>", styles['Normal']))
-    
     # ------------------------
-    # GAUGE (SIMULATED TEXT BAR)
+    # GAUGE (VISIBLE BAR STYLE)
     # ------------------------
-    score_band = "Excellent" if r["score"] > 800 else "Good" if r["score"] > 700 else "Moderate" if r["score"] > 600 else "High Risk"
+    score = r["score"]
     
-    gauge_text = f"Score Band: {score_band} (Score: {r['score']})"
-    content.append(Paragraph(gauge_text, styles['Normal']))
-    content.append(Spacer(1, 12))
+    if score > 800:
+        band = "Excellent"
+    elif score > 750:
+        band = "Good"
+    elif score > 650:
+        band = "Moderate"
+    else:
+        band = "High Risk"
     
-    # Table beside (metrics)
-    metrics_data = [
-        ["Income", r["total_income"]],
-        ["Expenses", r["total_expenses"]],
-        ["Savings", r["total_savings"]],
-    ]
+    content.append(Paragraph(f"<b>Score Band:</b> {band} (Score: {score})", styles['Normal']))
+    content.append(Spacer(1, 8))
     
-    metrics_table = Table(metrics_data)
-    metrics_table.setStyle(TableStyle([
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+    # Visual bar
+    bar_width = int((score - 300) / 600 * 400)
+    
+    gauge_table = Table([
+        ["", ""]
+    ], colWidths=[bar_width, 400 - bar_width], rowHeights=10)
+    
+    gauge_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,0), colors.HexColor("#1f4e79")),
+        ('BACKGROUND', (1,0), (1,0), colors.lightgrey),
     ]))
-    content.append(metrics_table)
+    
+    content.append(gauge_table)
     content.append(Spacer(1, 12))
     
     # Divider
@@ -544,7 +560,7 @@ if st.session_state.results is not None:
     # ------------------------
     # RULE BASED ANALYSIS
     # ------------------------
-    content.append(Paragraph("AltScore AI Credit Analysis (Rule-Based)", header_style))
+    content.append(Paragraph("AltScore AI Credit Analysis", title_style))
     
     analysis_points = [
         f"Stability Score: {round(r['stability'],2)}",
@@ -572,44 +588,65 @@ if st.session_state.results is not None:
     content.append(Paragraph("<hr width='100%'/>", styles['Normal']))
     
     # ------------------------
-    # MONTHLY SUMMARY + UNDERWRITING + RISK
+    # UNDERWRITING TABLE (WITH RANGES)
     # ------------------------
-    content.append(Paragraph("Financial Summary & Underwriting Signals", header_style))
+    content.append(Paragraph("Underwriting Signals", title_style))
     
-    risk = "Low Risk" if r["score"] > 750 else "Medium Risk" if r["score"] > 600 else "High Risk"
-    
-    combined_data = [
-        ["Metric", "Value", "Risk"],
-        ["Monthly Income", r["total_income"], risk],
-        ["Monthly Expenses", r["total_expenses"], ""],
-        ["Monthly Savings", r["total_savings"], ""],
-        ["Stability", round(r["stability"],2), ""],
-        ["Frequency", round(r["frequency"],2), ""],
-        ["Cash Flow", round(r["cf"],2), ""],
+    uw_data = [
+        ["Metric", "Value", "Ideal Range"],
+        ["Stability", round(r["stability"],2), "0.5 - 0.8"],
+        ["Frequency", round(r["frequency"],2), "0.5 - 0.9"],
+        ["Cash Flow", round(r["cf"],2), "0.4 - 0.8"],
     ]
     
-    combined_table = Table(combined_data, colWidths=[2.5*inch, 2*inch, 1.5*inch])
-    combined_table.setStyle(TableStyle([
+    uw_table = Table(uw_data, colWidths=[2*inch, 2*inch, 2*inch])
+    uw_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.lightblue),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
     ]))
-    content.append(combined_table)
     
-    content.append(Spacer(1, 20))
-    
-    # ------------------------
-    # DISCLAIMER
-    # ------------------------
-    content.append(Paragraph(
-        "Disclaimer: This is an illustrative credit assessment based on user inputs and alternative data modeling. "
-        "This is not an official credit bureau report. Use for informational purposes only.",
-        small_style
-    ))
+    content.append(uw_table)
+    content.append(Spacer(1, 12))
     
     # ------------------------
-    # BUILD PDF
+    # MONTHLY SUMMARY
     # ------------------------
-    doc.build(content)
+    content.append(Paragraph("Monthly Summary", title_style))
+    
+    monthly_data = [
+        ["Income", f"INR {r['total_income']}"],
+        ["Expenses", f"INR {r['total_expenses']}"],
+        ["Savings", f"INR {r['total_savings']}"],
+    ]
+    
+    monthly_table = Table(monthly_data)
+    monthly_table.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+    ]))
+    
+    content.append(monthly_table)
+    content.append(Spacer(1, 12))
+    
+    # ------------------------
+    # RISK (SEPARATE SECTION)
+    # ------------------------
+    risk = "Low Risk" if score > 750 else "Medium Risk" if score > 600 else "High Risk"
+    
+    content.append(Paragraph("Risk Classification", title_style))
+    content.append(Paragraph(f"<b>{risk}</b>", styles['Title']))
+    content.append(Spacer(1, 12))
+    
+    # ------------------------
+    # BORDER (FINAL FIX)
+    # ------------------------
+    border_table = Table([[content]], colWidths=[6*inch])
+    border_table.setStyle(TableStyle([
+        ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#1f4e79")),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    
+    doc.build([border_table])
     
     with open("report.pdf", "rb") as f:
         st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")    
