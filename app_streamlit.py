@@ -274,308 +274,148 @@ if st.session_state.results is not None:
     u3.metric("Cash Flow", round(r["cf"], 2))
 
     
-    # ALL calculations
-    # ALL UI (metrics, graphs, AI, PDF)
-
+        # ------------------------
+    # RISK LABEL
     # ------------------------
-    # FEATURE ENGINEERING
-    # ------------------------
-    foir = fixed_obligations / total_income if total_income > 0 else 0
-
-    stability = max(0, 1 - cv)
-    frequency = min(transactions / 200, 1)
-    cf = max(0, 1 - (total_expenses / total_income)) if total_income > 0 else 0.5
-
-    diversification = min(platform_count / 3, 1) if profile == "Gig Worker" else 0.5
-
-    # ------------------------
-    # SCORE
-    # ------------------------
-    score = 300
-
-    score += int(200 * stability)
-    score += int(150 * frequency)
-    score += int(150 * cf)
-    score += int(150 * savings)
-    score += int(150 * bill_pay)
-    score += int(100 * diversification)
-
-    if foir < 0.4:
-        score += 100
-    elif foir < 0.6:
-        score += 40
-    else:
-        score -= 100
-
-    score = max(300, min(score, 900))
-
-    # ------------------------
-    # RISK
-    # ------------------------
-    if score is not None:
-
-        if score > 750:
-            risk = "Low"
-            st.success("Low Risk")
-
-        elif score > 600:
-            risk = "Medium"
-            st.warning("Medium Risk")
-
-        else:
-            risk = "High"
-            st.error("High Risk")
-
-loan = "-"
-rate = "-"
-# ------------------------
-# RESULTS SECTION (ENHANCED UI)
-# ------------------------
-st.markdown("---")
-st.markdown("## 📊 Credit Assessment Results")
-
-# Top Metrics
-r1, r2, r3, r4 = st.columns(4)
-
-if score is not None:
-
-    st.markdown("---")
-    st.markdown("## 📊 Credit Assessment Results")
-
-    r1, r2, r3, r4 = st.columns(4)
-
-    r1.metric("Credit Score", score)
-    r2.metric("FOIR", round(foir, 2) if foir is not None else "-")
-    r3.metric("Savings Ratio", round(savings, 2))
-
-# Loan eligibility (added back)
-if score is not None:
-
-    if score > 750:
+    if r["score"] > 750:
         risk = "Low"
         st.success("Low Risk")
-
-    elif score > 600:
+    elif r["score"] > 600:
         risk = "Medium"
         st.warning("Medium Risk")
-
     else:
         risk = "High"
         st.error("High Risk")
-r4.metric("Eligible Loan", loan)
 
-if score is not None:
-    st.progress(score / 900)
-# ------------------------
-# UNDERWRITING SIGNALS
-# ------------------------
-st.markdown("### 🧠 Underwriting Signals")
-
-u1, u2, u3 = st.columns(3)
-
-u1.metric("Stability Score", round(stability, 2))
-u2.metric("Income Frequency", round(frequency, 2))
-u3.metric("Cash Flow Score", round(cf, 2))
-
-# ------------------------
-# RISK SIGNALS
-# ------------------------
-st.markdown("### 🚨 Risk Signals")
-
-if cv > 0.5:
-    st.error("High income volatility detected")
-
-if foir > 0.6:
-    st.error("High debt burden")
-
-if cf < 0.3:
-    st.warning("Weak cash flow position")
-
-if stability > 0.7:
-    st.success("Stable income behavior")
-
-# ------------------------
-# INTERACTIVE VISUALS
-# ------------------------
-st.markdown("### 📈 Financial Insights")
-
-import plotly.express as px
-import pandas as pd
-
-# Financial Breakdown Chart
-finance_df = pd.DataFrame({
-    "Category": ["Income", "Expenses", "Savings"],
-    "Amount": [total_income, total_expenses, total_income - total_expenses]
-})
-
-fig1 = px.bar(
-    finance_df,
-    x="Category",
-    y="Amount",
-    color="Category",
-    text="Amount",
-    title="Income vs Expenses vs Savings"
-)
-
-fig1.update_layout(showlegend=False)
-st.plotly_chart(fig1, use_container_width=True)
-
-# Score Components Radar Chart
-score_df = pd.DataFrame({
-    "Metric": ["Stability", "Frequency", "Cash Flow", "Savings"],
-    "Value": [stability, frequency, cf, savings]
-})
-
-fig2 = px.line_polar(
-    score_df,
-    r="Value",
-    theta="Metric",
-    line_close=True,
-    title="Behavioral Score Profile"
-)
-
-st.plotly_chart(fig2, use_container_width=True)
-
-# ------------------------
-# GPT AI ANALYSIS (LIVE)
-# ------------------------
-st.markdown("### 🤖 AI Credit Analysis")
-
-with st.spinner("AI is analyzing borrower profile..."):
-
-    try:
-        prompt = f"""
-        You are a credit risk analyst.
-
-        Analyze this borrower:
-
-        Income: {total_income}
-        Expenses: {total_expenses}
-        Savings Ratio: {round(savings,2)}
-        FOIR: {round(foir,2)}
-        Stability Score: {round(stability,2)}
-        Frequency Score: {round(frequency,2)}
-        Cash Flow Score: {round(cf,2)}
-
-        Provide:
-        1. Risk summary
-        2. Key strengths
-        3. Key risks
-        4. Final recommendation
-
-        Keep it professional, concise, and structured.
-        """
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        ai_output = response.choices[0].message.content
-
-        st.markdown(ai_output)
-
-    except Exception as e:
-        st.warning("AI analysis unavailable, showing fallback")
-
-        st.write(f"""
-        Stability: {round(stability,2)}, FOIR: {round(foir,2)}.
-        Moderate underwriting risk.
-        """)
-# ------------------------
-# CONFIDENCE SCORE
-# ------------------------
-confidence = (
-    0.25 * stability +
-    0.20 * frequency +
-    0.20 * cf +
-    0.20 * (1 - foir) +
-    0.15 * savings
-)
-
-confidence = max(0, min(confidence, 1))
-
-st.markdown("### 🎯 Model Confidence")
-
-if confidence > 0.75:
-    st.success(f"High Confidence: {round(confidence,2)}")
-elif confidence > 0.5:
-    st.warning(f"Moderate Confidence: {round(confidence,2)}")
-else:
-    st.error(f"Low Confidence: {round(confidence,2)}")
-
-
-# ------------------------
-# ADVANCED AI ANALYSIS (for testing only)
-# ------------------------
-st.markdown("### 🤖 AI Credit Analysis")
-
-analysis = []
-
-# Stability
-if stability > 0.7:
-    analysis.append(f"Income stability is strong (score: {round(stability,2)}), indicating predictable earnings behavior.")
-else:
-    analysis.append(f"Income shows volatility (CV: {round(cv,2)}), which may impact repayment consistency.")
-
-# Frequency
-if frequency > 0.6:
-    analysis.append("Income frequency is consistent, suggesting steady earning patterns.")
-else:
-    analysis.append("Income inflow is irregular, indicating potential gaps in earnings.")
-
-# Cash Flow
-if cf > 0.5:
-    analysis.append("Cash flow position is healthy, with sufficient surplus after expenses.")
-else:
-    analysis.append("Cash flow is constrained, indicating limited financial buffer.")
-
-# FOIR
-if foir < 0.4:
-    analysis.append(f"FOIR is {round(foir,2)}, reflecting low financial stress and strong repayment capacity.")
-else:
-    analysis.append(f"FOIR is {round(foir,2)}, indicating elevated financial obligations relative to income.")
-
-# Behavioral Layer
-if savings > 0.3:
-    analysis.append("Savings behavior is strong, reinforcing financial discipline.")
-else:
-    analysis.append("Savings buffer is limited, increasing vulnerability to income shocks.")
-
-# Final Recommendation
-if score > 750:
-    recommendation = "Borrower is highly creditworthy and eligible for premium lending products."
-elif score > 600:
-    recommendation = "Borrower is moderately creditworthy. Controlled exposure recommended."
-else:
-    recommendation = "Borrower is high risk. Lending should be cautious or limited."
-
-# Display output like real AI
-for line in analysis:
-    st.write("• " + line)
-
-st.markdown("---")
-st.markdown("### 📌 Recommendation")
-
-if score > 750:
-    st.success(recommendation)
-elif score > 600:
-    st.warning(recommendation)
-else:
-    st.error(recommendation)
-    
     # ------------------------
-    # PDF
+    # INTERACTIVE GRAPHS
     # ------------------------
+    import plotly.express as px
+    import pandas as pd
+
+    st.markdown("### 📈 Financial Insights")
+
+    finance_df = pd.DataFrame({
+        "Category": ["Income", "Expenses", "Savings"],
+        "Amount": [r["total_income"], r["total_expenses"], r["total_savings"]]
+    })
+
+    fig1 = px.bar(finance_df, x="Category", y="Amount", color="Category", text="Amount")
+    st.plotly_chart(fig1, use_container_width=True)
+
+    score_df = pd.DataFrame({
+        "Metric": ["Stability", "Frequency", "Cash Flow", "Savings"],
+        "Value": [r["stability"], r["frequency"], r["cf"], r["savings_ratio"]]
+    })
+
+    fig2 = px.line_polar(score_df, r="Value", theta="Metric", line_close=True)
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # ------------------------
+    # GPT AI ANALYSIS
+    # ------------------------
+    st.markdown("### 🤖 AI Credit Analysis (GPT)")
+
+    with st.spinner("AI is analyzing borrower profile..."):
+
+        try:
+            prompt = f"""
+            You are a senior credit risk analyst.
+
+            Analyze this borrower:
+
+            Income: {r["total_income"]}
+            Expenses: {r["total_expenses"]}
+            Savings Ratio: {round(r["savings_ratio"],2)}
+            FOIR: {round(r["foir"],2)}
+            Stability Score: {round(r["stability"],2)}
+            Frequency Score: {round(r["frequency"],2)}
+            Cash Flow Score: {round(r["cf"],2)}
+
+            Provide:
+            - Risk summary
+            - Key strengths
+            - Key risks
+            - Final recommendation
+            """
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            st.markdown(response.choices[0].message.content)
+
+        except:
+            st.warning("AI analysis unavailable")
+
+    # ------------------------
+    # CONFIDENCE SCORE
+    # ------------------------
+    confidence = (
+        0.25 * r["stability"] +
+        0.20 * r["frequency"] +
+        0.20 * r["cf"] +
+        0.20 * (1 - r["foir"]) +
+        0.15 * r["savings_ratio"]
+    )
+
+    confidence = max(0, min(confidence, 1))
+
+    st.markdown("### 🎯 Model Confidence")
+
+    if confidence > 0.75:
+        st.success(f"High Confidence: {round(confidence,2)}")
+    elif confidence > 0.5:
+        st.warning(f"Moderate Confidence: {round(confidence,2)}")
+    else:
+        st.error(f"Low Confidence: {round(confidence,2)}")
+
+    # ------------------------
+    # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
+    # ------------------------
+    st.markdown("### 🤖 AI Credit Analysis (Rule-Based)")
+
+    analysis = []
+
+    if r["stability"] > 0.7:
+        analysis.append("Income stability is strong.")
+    else:
+        analysis.append("Income shows volatility.")
+
+    if r["frequency"] > 0.6:
+        analysis.append("Income frequency is consistent.")
+    else:
+        analysis.append("Income is irregular.")
+
+    if r["cf"] > 0.5:
+        analysis.append("Cash flow is healthy.")
+    else:
+        analysis.append("Cash flow is constrained.")
+
+    if r["foir"] < 0.4:
+        analysis.append("Low financial stress.")
+    else:
+        analysis.append("High financial obligations.")
+
+    for line in analysis:
+        st.write("• " + line)
+
+    # ------------------------
+    # PDF DOWNLOAD
+    # ------------------------
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+
     doc = SimpleDocTemplate("report.pdf")
     styles = getSampleStyleSheet()
 
     content = []
     content.append(Paragraph("AltScore Report", styles['Title']))
     content.append(Spacer(1, 12))
-    content.append(Paragraph(f"Score: {score}", styles['Normal']))
+    content.append(Paragraph(f"Score: {r['score']}", styles['Normal']))
     content.append(Paragraph(f"Risk: {risk}", styles['Normal']))
-    content.append(Paragraph(f"FOIR: {round(foir,2)}", styles['Normal']))
+    content.append(Paragraph(f"FOIR: {round(r['foir'],2)}", styles['Normal']))
 
     doc.build(content)
 
