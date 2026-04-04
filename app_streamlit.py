@@ -371,7 +371,7 @@ with st.spinner("AI is analyzing borrower profile..."):
     # ------------------------
     # CONFIDENCE SCORE
     # ------------------------
-    confidence = (
+        confidence = (
         0.25 * r["stability"] +
         0.20 * r["frequency"] +
         0.20 * r["cf"] +
