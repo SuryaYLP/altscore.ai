@@ -30,6 +30,12 @@ st.markdown("---")
 # ------------------------
 # SESSION START BUTTON
 # ------------------------
+score = None
+foir = None
+stability = None
+frequency = None
+cf = None
+
 if "start" not in st.session_state:
     st.session_state.start = False
 
@@ -235,9 +241,16 @@ st.markdown("## 📊 Credit Assessment Results")
 # Top Metrics
 r1, r2, r3, r4 = st.columns(4)
 
-r1.metric("Credit Score", score)
-r2.metric("FOIR", round(foir, 2))
-r3.metric("Savings Ratio", round(savings, 2))
+if score is not None:
+
+    st.markdown("---")
+    st.markdown("## 📊 Credit Assessment Results")
+
+    r1, r2, r3, r4 = st.columns(4)
+
+    r1.metric("Credit Score", score)
+    r2.metric("FOIR", round(foir, 2) if foir is not None else "-")
+    r3.metric("Savings Ratio", round(savings, 2))
 
 # Loan eligibility (added back)
 if score > 750:
