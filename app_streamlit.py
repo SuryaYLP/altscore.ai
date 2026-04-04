@@ -14,6 +14,40 @@ st.markdown("""
 <style>
 body {background-color: white;}
 h1, h2, h3 {color: #1f4e79;}
+
+.signal-card {
+    background: #f8fbff;
+    border: 1px solid #d9e8f5;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+.analysis-box {
+    background: #f4f9f4;
+    border-left: 6px solid #2e7d32;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 10px;
+    color: #1f1f1f;
+}
+
+.risk-box {
+    background: #fff8e1;
+    border-left: 6px solid #f9a825;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 10px;
+    color: #1f1f1f;
+}
+
+.metric-box {
+    background: #f8fbff;
+    border: 1px solid #d9e8f5;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -114,18 +148,32 @@ fixed_obligations = st.number_input("Fixed obligations (EMI, rent)", 0, 200000, 
 other_expenses = st.number_input("Other expenses", 0, 200000, 15000)
 
 total_expenses = fixed_obligations + other_expenses
+avg_monthly_income = total_income
+avg_monthly_total_expenses = total_expenses
+avg_monthly_savings = avg_monthly_income - avg_monthly_total_expenses
 
 # ------------------------
 # BEHAVIORAL
 # ------------------------
 st.markdown("---")
 st.markdown("## 📊 Behavioral Signals")
+st.caption("Extracted from CSV File")
 
 transactions = st.slider("Transactions", 0, 300, 100)
-savings = st.slider("Savings ratio", 0.0, 1.0, 0.2)
+st.caption("Total number of monthly financial transactions observed in the account.")
+
+savings = (avg_monthly_savings / avg_monthly_income) if avg_monthly_income > 0 else 0
+st.write(f"Savings Ratio: {round(savings, 2)}")
+st.caption("Savings Ratio = Avg Monthly Savings / Avg Monthly Income")
+
 bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
+st.caption("Shows how regularly the borrower pays recurring bills on time.")
+
 p2p = st.slider("UPI transfers", 0, 100, 20)
+st.caption("Represents the volume of peer-to-peer UPI transfers in a month.")
+
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
+st.caption("Indicates how stable the borrower’s work or residence location is over time.")
 
 # ------------------------
 # RESULT BUTTON
@@ -142,6 +190,7 @@ if st.button("🔍 Check Credit Score"):
     cf = max(0, 1 - (total_expenses / total_income)) if total_income > 0 else 0.5
 
     diversification = min(platform_count / 3, 1) if profile == "Gig Worker" else 0.5
+    avg_gap_days = round(30 / transactions, 1) if transactions > 0 else 30
 
     # ------------------------
     # SCORE
@@ -183,28 +232,68 @@ if st.button("🔍 Check Credit Score"):
     st.markdown("---")
     st.markdown("## 📊 Check Credit Score")
 
-    st.metric("Score", score)
-    st.metric("FOIR", round(foir, 2))
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Score", score)
+    col2.metric("FOIR", round(foir, 2))
+    col3.metric("Avg Monthly Total Income", f"₹{avg_monthly_income}")
+    col4.metric("Avg Monthly Total Expenses", f"₹{avg_monthly_total_expenses}")
+    col5.metric("Avg Monthly Savings", f"₹{avg_monthly_savings}")
 
     # ------------------------
     # UNDERWRITING SIGNALS
     # ------------------------
     st.markdown("### 🧠 Underwriting Signals")
-    st.write("Stability Score:", round(stability,2))
-    st.write("Income Frequency:", round(frequency,2))
-    st.write("Cash Flow Score:", round(cf,2))
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown(f"""
+        <div class="signal-card">
+            <h4>Stability Score</h4>
+            <p style="font-size:24px; font-weight:600; color:#1f4e79;">{round(stability,2)}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown(f"""
+        <div class="signal-card">
+            <h4>Income Frequency</h4>
+            <p style="font-size:24px; font-weight:600; color:#1f4e79;">{round(frequency,2)}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown(f"""
+        <div class="signal-card">
+            <h4>Cash Flow Score</h4>
+            <p style="font-size:24px; font-weight:600; color:#1f4e79;">{round(cf,2)}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ------------------------
+    # RISK SIGNALS
+    # ------------------------
+    st.markdown("### ⚠️ Risk Signals")
+    st.markdown(f"""
+    <div class="risk-box">
+        <p><strong>Risk Level:</strong> {risk}</p>
+        <p><strong>FOIR:</strong> {round(foir,2)}</p>
+        <p><strong>Income Volatility (CV):</strong> {round(cv,2)}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # ------------------------
     # AI ANALYSIS
     # ------------------------
     st.markdown("### 🤖 Detailed AI Analysis")
 
-    st.write(f"""
-    This borrower shows a stability score of {round(stability,2)} and income volatility (CV) of {round(cv,2)}.
-    Income consistency is {'strong' if frequency > 0.6 else 'weak'}.
-    FOIR is {round(foir,2)}, indicating {'low' if foir < 0.4 else 'high'} financial stress.
-    Overall risk is classified as {risk}.
-    """)
+    st.markdown(f"""
+    <div class="analysis-box">
+        <p>This borrower shows a <strong>stability score of {round(stability,2)}</strong> and income volatility (CV) of <strong>{round(cv,2)}</strong>.</p>
+        <p>Income consistency is <strong>{'strong' if frequency > 0.6 else 'weak'}</strong>, with average gaps of <strong>{avg_gap_days} days</strong>.</p>
+        <p>FOIR is <strong>{round(foir,2)}</strong>, indicating <strong>{'low' if foir < 0.4 else 'high'}</strong> financial stress.</p>
+        <p>Overall risk is classified as <strong>{risk}</strong>.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # ------------------------
     # PDF
