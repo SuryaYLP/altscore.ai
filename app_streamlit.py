@@ -239,7 +239,8 @@ if st.button("🔍 Check Credit Score"):
             risk = "High"
             st.error("High Risk")
 
-
+loan = "-"
+rate = "-"
 # ------------------------
 # RESULTS SECTION (ENHANCED UI)
 # ------------------------
