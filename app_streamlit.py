@@ -11,6 +11,7 @@ if "results" not in st.session_state:
     st.session_state.results = None
     
 st.set_page_config(page_title="AltScore AI", layout="wide")
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # UI STYLE
 # ------------------------
@@ -37,7 +38,7 @@ st.markdown("---")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # SESSION START BUTTON
 # ------------------------
@@ -57,6 +58,8 @@ if not st.session_state.start:
     st.stop()
 st.markdown('</div>', unsafe_allow_html=True)
 
+
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # PROFILE
 # ------------------------
@@ -133,7 +136,7 @@ else:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # EXPENSES
 # ------------------------
@@ -148,7 +151,7 @@ total_savings = total_income - total_expenses
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # BEHAVIORAL
 # ------------------------
@@ -171,6 +174,7 @@ st.caption("Indicates how stable the user's location is. Higher stability reduce
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+st.markdown('<div class="section">', unsafe_allow_html=True)
 # ------------------------
 # RESULT BUTTON
 # ------------------------
@@ -282,7 +286,7 @@ if st.session_state.results is not None:
     u2.metric("Frequency", round(r["frequency"], 2))
     u3.metric("Cash Flow", round(r["cf"], 2))
 
-    
+    st.markdown('<div class="section">', unsafe_allow_html=True)
     # ------------------------
     # RISK LABEL
     # ------------------------
@@ -297,6 +301,7 @@ if st.session_state.results is not None:
         st.error("High Risk")
     
     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section">', unsafe_allow_html=True)
 
     # ------------------------
     # INTERACTIVE GRAPHS
@@ -345,6 +350,7 @@ fig = go.Figure(go.Indicator(
 
 st.plotly_chart(fig, use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section">', unsafe_allow_html=True)
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
@@ -384,6 +390,7 @@ with st.spinner("AI is analyzing borrower profile..."):
             st.warning("AI analysis unavailable")
             
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section">', unsafe_allow_html=True)
 
     # ------------------------
     # CONFIDENCE SCORE
@@ -408,6 +415,7 @@ with st.spinner("AI is analyzing borrower profile..."):
             st.error(f"Low Confidence: {round(confidence,2)}")
 
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section">', unsafe_allow_html=True)
 
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
@@ -440,6 +448,7 @@ with st.spinner("AI is analyzing borrower profile..."):
             st.write("• " + line)
 
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section">', unsafe_allow_html=True)
 
     # ------------------------
     # PDF DOWNLOAD
