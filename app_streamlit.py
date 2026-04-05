@@ -477,7 +477,7 @@ if st.session_state.results is not None:
     # ------------------------
     header = Table([
         [
-            Paragraph("<b>AltScore.AI</b><br/><font size=10 color='#5b9bd5'>Alternative Credit Scoring</font>", logo_style),
+            Paragraph("<b>AltScore.AI</b>", logo_style),
             Paragraph("<b>Credit Rating Report</b>", styles['Heading2'])
         ],
         [
