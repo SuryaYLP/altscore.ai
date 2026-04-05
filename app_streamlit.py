@@ -736,11 +736,11 @@ if st.session_state.results is not None:
     
         canvas.restoreState()
         
-        # ------------------------
-        # BUILD + DOWNLOAD FIX
-        # ------------------------
-        doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
+     # ------------------------
+    # BUILD + DOWNLOAD FIX
+    # ------------------------
+    doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
         
-        if os.path.exists("report.pdf"):
-            with open("report.pdf", "rb") as f:
-                st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
+    if os.path.exists("report.pdf"):
+        with open("report.pdf", "rb") as f:
+            st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
