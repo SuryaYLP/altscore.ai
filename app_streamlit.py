@@ -314,9 +314,9 @@ if st.session_state.results is not None:
     # Underwriting Signals
     st.markdown("### 🧠 Underwriting Signals")
     u1, u2, u3 = st.columns(3)
-    u1.metric("Stability", round(r["stability"], 2))
-    u2.metric("Frequency", round(r["frequency"], 2))
-    u3.metric("Cash Flow", round(r["cf"], 2))
+    u1.metric("Stability - How consistent the income is over time", round(r["stability"], 2))
+    u2.metric("Frequency - How regularly money comes into the account", round(r["frequency"], 2))
+    u3.metric("Cash Flow - How much money is left after expenses", round(r["cf"], 2))
 
     # ------------------------
     # RISK LABEL
@@ -338,30 +338,73 @@ if st.session_state.results is not None:
     # ------------------------
     import plotly.express as px
     import pandas as pd
-
     st.markdown("### 📈 Financial Insights")
-
-    finance_df = pd.DataFrame({
-        "Category": ["Income", "Expenses", "Savings"],
-        "Amount": [r["total_income"], r["total_expenses"], r["total_savings"]]
-    })
-
-    fig1 = px.bar(finance_df, x="Category", y="Amount", color="Category", text="Amount")
-    st.plotly_chart(fig1, use_container_width=True)
-
-    score_df = pd.DataFrame({
-        "Metric": ["Stability", "Frequency", "Cash Flow", "Savings"],
-        "Value": [r["stability"], r["frequency"], r["cf"], r["savings_ratio"]]
-    })
-
-    fig2 = px.line_polar(score_df, r="Value", theta="Metric", line_close=True)
-    st.plotly_chart(fig2, use_container_width=True)
-    if st.session_state.results is not None:
-
-        r = st.session_state.results
-
-        import plotly.graph_objects as go
-
+    
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import pandas as pd
+    
+    # ---------------- LAYOUT
+    col1, col2 = st.columns(2)
+    
+    # ---------------- LEFT SIDE (BAR CHART)
+    with col1:
+        finance_df = pd.DataFrame({
+            "Category": ["Income", "Expenses", "Savings"],
+            "Amount": [
+                r["total_income"],
+                r["total_expenses"],
+                r["total_savings"]
+            ]
+        })
+    
+        fig1 = px.bar(
+            finance_df,
+            x="Category",
+            y="Amount",
+            color="Category",
+            text="Amount",
+            title="Income vs Expenses vs Savings"
+        )
+    
+        st.plotly_chart(fig1, use_container_width=True)
+    
+    # ---------------- RIGHT SIDE (GAUGE GRID)
+    with col2:
+    
+        st.markdown("#### Behavioral Score Gauges")
+    
+        g1, g2 = st.columns(2)
+        g3, g4 = st.columns(2)
+    
+        def create_gauge(title, value):
+            return go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=value,
+                title={'text': title},
+                gauge={
+                    'axis': {'range': [0, 1]},
+                    'bar': {'color': "#1f4e79"},
+                    'steps': [
+                        {'range': [0, 0.4], 'color': "red"},
+                        {'range': [0.4, 0.7], 'color': "yellow"},
+                        {'range': [0.7, 1], 'color': "green"},
+                    ],
+                }
+            ))
+    
+        with g1:
+            st.plotly_chart(create_gauge("Stability", r["stability"]), use_container_width=True)
+    
+        with g2:
+            st.plotly_chart(create_gauge("Frequency", r["frequency"]), use_container_width=True)
+    
+        with g3:
+            st.plotly_chart(create_gauge("Cash Flow", r["cf"]), use_container_width=True)
+    
+        with g4:
+            st.plotly_chart(create_gauge("Savings", r["savings_ratio"]), use_container_width=True)
+        
         st.markdown("### 📊 Credit Score Gauge")
             
         fig = go.Figure(go.Indicator(
