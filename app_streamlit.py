@@ -132,7 +132,7 @@ st.markdown("---")
 st.markdown("## 💰 Expenses")
 
 fixed_obligations = st.number_input("Fixed obligations per month (EMI, rent)", 0, 200000, 10000)
-other_expenses = st.number_input("Other expenses per month (Not including fixed obligations)", 0, 200000, 15000)
+other_expenses = st.number_input("Other expenses per month (Not including fixed obligations)", 0, 200000, 5000)
 
 total_expenses = fixed_obligations + other_expenses
 total_savings = total_income - total_expenses
