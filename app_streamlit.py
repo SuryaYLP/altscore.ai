@@ -73,7 +73,7 @@ if profile == "Gig Worker":
 
     # ---------------- DELIVERY ----------------
     if sub_profile == "Delivery Agent":
-        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 15000)
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 20000)
         cv = st.slider("Earnings volatility / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
         tenure = st.slider("Platform tenure (months)", 0, 60, 42)
         completion = st.slider("Order completion rate: 1-All orders fulfilled", 0.0, 1.0, 0.9)
@@ -83,10 +83,10 @@ if profile == "Gig Worker":
 
     # ---------------- DRIVER ----------------
     elif sub_profile == "Driver Partner":
-        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 25000)
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 20000)
         cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
         weekly_trend = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -1.0, 1.0, 0.5)
-        cancel_rate = st.slider("Ride aancellation rate", 0.0, 1.0, 0.1)
+        cancel_rate = st.slider("Ride cancellation rate", 0.0, 1.0, 0.1)
         tenure = st.slider("Platform tenure (months)", 0, 60, 18)
         rating = st.slider("Driver rating: 0-Lowest Rating, 5-Highest Rating", 1.0, 5.0, 4.5)
         acceptance = st.slider("Ride acceptance rate: 1-All rides are accepted", 0.0, 1.0, 0.8)
@@ -95,7 +95,7 @@ if profile == "Gig Worker":
 
     # ---------------- SERVICE ----------------
     elif sub_profile == "Service Professional":
-        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 40000)
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 20000)
         completion = st.slider("Job completion rate", 0.0, 1.0, 0.9)
         repeat = st.slider("Repeat customer rate", 0.0, 1.0, 0.5)
         growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
@@ -106,24 +106,21 @@ if profile == "Gig Worker":
 
     # ---------------- BLUE COLLAR / OTHERS ----------------
     elif sub_profile == "Blue Collar / Others":
-        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 40000)
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 20000)
         growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
         seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
         cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
 
     # ---------------- CROSS PLATFORM ----------------
-    st.markdown("### 🌐 Cross Platform Signals")
+    st.markdown("### 🌐 Income from other sources(Optional)")
 
-    secondary_income = st.number_input("Monthly income from other platforms (Rs.)", 0, 200000, 10000)
-    platform_count = st.slider("Number of platforms", 1, 5, 2)
-    active_months = st.slider("Consecutive active months", 0, 60, 12)
-    yoy_growth = st.slider("YoY growth across all platforms", -50, 100, 10)
-    reconciliation = st.slider("Income reconciliation score", 0.0, 1.0, 0.8)
+    secondary_income = st.number_input("Monthly income from other sources (Rs.)", 0, 200000, 5000)
+    
 
     total_income = primary_income + secondary_income
 
 else:
-    total_income = st.number_input("Monthly income (Rs.)", 0, 200000, 30000)
+    total_income = st.number_input("Monthly income (Rs.)", 0, 200000, 25000)
     cv = 0.3
 
 st.markdown('</div>', unsafe_allow_html=True)
@@ -183,7 +180,7 @@ st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, us
 transactions = transactions if 'transactions' in locals() else st.slider("Transactions", 0, 300, 100)
 st.caption("Number of financial transactions. Higher = more active financial behavior.")
 
-savings = st.slider("Savings ratio", 0.0, 1.0, 0.2)
+savings = st.slider("Savings ratio", 0.0, 1.0, 0.4)
 st.caption("Savings Ratio = Monthly Savings / Monthly Income. Higher ratio indicates better financial discipline.")
 
 bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
