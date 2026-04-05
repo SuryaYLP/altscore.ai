@@ -515,31 +515,56 @@ if st.session_state.results is not None:
     content.append(summary)
     content.append(Spacer(1, 12))
     
-    # ------------------------
-    # SPEEDOMETER GAUGE (IMAGE)
-    # ------------------------
-    # Create gauge using plotly and save image
-    import plotly.graph_objects as go
+   # ------------------------
+# CLEAN PDF GAUGE (NO PLOTLY)
+# ------------------------
+
+    score = r["score"]
     
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=r["score"],
-        gauge={
-            'axis': {'range': [300,900]},
-            'steps': [
-                {'range':[300,650],'color':"red"},
-                {'range':[650,700],'color':"orange"},
-                {'range':[700,750],'color':"yellow"},
-                {'range':[750,900],'color':"green"}
-            ]
-        }
-    ))
+    content.append(Paragraph("Credit Score", styles['Heading3']))
     
-    fig.write_image("gauge.png")
+    # Range labels
+    range_table = Table([["300", "", "900"]], colWidths=[1*inch, 4*inch, 1*inch])
+    range_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('ALIGN', (2,0), (2,0), 'RIGHT'),
+    ]))
+    content.append(range_table)
     
-    content.append(Image("gauge.png", width=4*inch, height=2.5*inch))
+    # Colored segments (CIBIL-style)
+    segments = [
+        (300, 650, colors.red),
+        (650, 700, colors.orange),
+        (700, 750, colors.yellow),
+        (750, 900, colors.green)
+    ]
+    
+    bar = []
+    for seg in segments:
+        width = int((seg[1] - seg[0]) / 600 * 400)
+        bar.append(("", width, seg[2]))
+    
+    bar_table = Table([[b[0] for b in bar]],
+                      colWidths=[b[1] for b in bar],
+                      rowHeights=10)
+    
+    bar_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,0), colors.red),
+        ('BACKGROUND', (1,0), (1,0), colors.orange),
+        ('BACKGROUND', (2,0), (2,0), colors.yellow),
+        ('BACKGROUND', (3,0), (3,0), colors.green),
+    ]))
+    
+    content.append(bar_table)
+    
+    # Marker for score
+    marker_pos = int((score - 300) / 600 * 400)
+    
+    marker_table = Table([["▲"]], colWidths=[marker_pos], rowHeights=10)
+    content.append(marker_table)
+    
     content.append(Spacer(1, 12))
-    
+        
     # ------------------------
     # RISK INLINE (FIXED)
     # ------------------------
