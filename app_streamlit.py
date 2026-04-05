@@ -690,11 +690,11 @@ if st.session_state.results is not None:
     
     uw = Table([
         ["Metric","Value","Range","Interpretation"],
-        ["Stability", round(r["stability"],2), "0.5-0.8",
+        ["Stability - How consistent the income is over time", round(r["stability"],2), "0.5-0.8",
          "Stable income" if r["stability"]>0.6 else "Volatile income"],
-        ["Frequency", round(r["frequency"],2), "0.5-0.9",
+        ["Frequency - How regularly money comes into account", round(r["frequency"],2), "0.5-0.9",
          "Consistent inflow" if r["frequency"]>0.6 else "Irregular income"],
-        ["Cash Flow", round(r["cf"],2), "0.4-0.8",
+        ["Cash Flow - How much money left after expenses", round(r["cf"],2), "0.4-0.8",
          "Healthy buffer" if r["cf"]>0.5 else "Weak surplus"],
     ])
     
