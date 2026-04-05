@@ -393,7 +393,14 @@ if st.session_state.results is not None:
                     number={'font': {'size': 28}},
                     title={'text': title, 'font': {'size': 14}},
                     gauge={
-                        'axis': {'range': [0, 1], 'tickwidth': 0},
+                        'axis': {
+                                'range': [0, 1],
+                                'tickvals': [0, 0.25, 0.5, 0.75, 1],
+                                'ticktext': ["0.00", "0.25", "0.50", "0.75", "1.00"],
+                                'tickfont': {'size': 10, 'color': "gray"}
+                                'tickcolor': "lightgray",
+                                'tickwidth': 1,
+                            },
                         'bar': {'color': "#1f4e79", 'thickness': 0.25},
                         'bgcolor': "white",
                         'borderwidth': 0,
@@ -758,11 +765,11 @@ if st.session_state.results is not None:
     
     uw = Table([
         ["Metric","Value","Range","Interpretation"],
-        ["Stability - How consistent the income is over time", round(r["stability"],2), "0.5-0.8",
+        ["Stability (Consistent of income over time)", round(r["stability"],2), "0.5-0.8",
          "Stable income" if r["stability"]>0.6 else "Volatile income"],
-        ["Frequency - How regularly money comes into account", round(r["frequency"],2), "0.5-0.9",
+        ["Frequency (Regularity of income into account)", round(r["frequency"],2), "0.5-0.9",
          "Consistent inflow" if r["frequency"]>0.6 else "Irregular income"],
-        ["Cash Flow - How much money left after expenses", round(r["cf"],2), "0.4-0.8",
+        ["Cash Flow (Money left after expenses)", round(r["cf"],2), "0.4-0.8",
          "Healthy buffer" if r["cf"]>0.5 else "Weak surplus"],
     ])
     
