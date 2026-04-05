@@ -178,19 +178,19 @@ st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, us
 
 # Use CSV values if available
 if 'transactions' in locals():
-    st.write(f"Transactions (from CSV): {transactions}")
+    st.write(f"Total number of financial transactions (extracted from CSV file): {transactions}")
 else:
     transactions = st.slider("Transactions", 0, 300, 100)
     st.caption("Number of financial transactions. Higher = more active financial behavior.")
 
 if 'upi' in locals():
-    st.write(f"UPI Transactions (from CSV): {upi}")
+    st.write(f"Number of UPI transactions (extracted from CSV file): {upi}")
 else:
     upi = st.slider("UPI Transactions", 0, 500, 20)
     st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
 
 if 'p2p' in locals():
-    st.write(f"P2P Transfers (from CSV): {p2p}")
+    st.write(f"Number of P2P Transfers (extracted from CSV file): {p2p}")
 else:
     p2p = st.slider("P2P Transfers", 0, 100, 20)
     st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
@@ -386,7 +386,7 @@ if st.session_state.results is not None:
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
-    st.markdown("### 🤖 AI Credit Analysis (GPT)")
+    st.markdown("### 🤖 AI Credit Analysis (Chat GPT API)")
     
     with st.spinner("AI is analyzing borrower profile..."):
     
@@ -419,7 +419,7 @@ if st.session_state.results is not None:
                 st.markdown(response.choices[0].message.content)
     
             except Exception as e:
-                st.warning("Live AI is unavailable at the moment — Displaying confidence score and AltScore rule based AI Analysis")
+                st.warning("Chat GPT API is unavailable at the moment — Displaying confidence score and AltScore rule based AI Analysis")
     
     # ------------------------
     # CONFIDENCE SCORE
@@ -435,6 +435,8 @@ if st.session_state.results is not None:
     confidence = max(0, min(confidence, 1))
 
     st.markdown("### Confidence Score")
+    st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
+
 
     if confidence > 0.75:
         st.success(f"High Confidence: {round(confidence,2)}")
@@ -448,7 +450,7 @@ if st.session_state.results is not None:
     # ------------------------
     # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
     # ------------------------
-    st.markdown("### 🤖 AltScore AI Credit Analysis (Rule-Based)")
+    st.markdown("### AltScore Rule based AI Credit Analysis")
     analysis = []
         
     analysis.append(f"Stability Score: {round(r['stability'],2)}")
