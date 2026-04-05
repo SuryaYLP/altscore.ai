@@ -377,7 +377,7 @@ if st.session_state.results is not None:
                 st.markdown(response.choices[0].message.content)
     
             except Exception as e:
-                st.error(f"AI Error: {str(e)}")
+                st.warning("Live AI is unavailable at the moment — Displaying confidence score and AltScore rule based AI Analysis")
     
     # ------------------------
     # CONFIDENCE SCORE
