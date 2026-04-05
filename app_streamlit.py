@@ -405,7 +405,7 @@ if st.session_state.results is not None:
         with g4:
             st.plotly_chart(create_gauge("Savings", r["savings_ratio"]), use_container_width=True)
         
-        st.markdown("### 📊 Credit Score Gauge")
+    st.markdown("### 📊 Credit Score Gauge")
             
         fig = go.Figure(go.Indicator(
                 mode="gauge+number",
