@@ -710,37 +710,37 @@ if st.session_state.results is not None:
     def draw_border(canvas, doc):
         canvas.saveState()
 
-    # ------------------------
-    # BORDER (thin, clean)
-    # ------------------------
-    canvas.setStrokeColor(colors.HexColor("#1f4e79"))
-    canvas.setLineWidth(0.8)
-
-    canvas.rect(
-        doc.leftMargin - 10,
-        doc.bottomMargin - 10,
-        doc.width + 20,
-        doc.height + 20
-    )
-
-    # ------------------------
-    # WATERMARK (center faded)
-    # ------------------------
-    canvas.setFont("Helvetica-Bold", 60)
-    canvas.setFillColor(colors.lightgrey)
-
-    canvas.translate(300, 400)
-    canvas.rotate(30)
-
-    canvas.drawCentredString(0, 0, "AltScore AI")
-
-    canvas.restoreState()
+        # ------------------------
+        # BORDER (thin, clean)
+        # ------------------------
+        canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+        canvas.setLineWidth(0.8)
     
-    # ------------------------
-    # BUILD + DOWNLOAD FIX
-    # ------------------------
-    doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
+        canvas.rect(
+            doc.leftMargin - 10,
+            doc.bottomMargin - 10,
+            doc.width + 20,
+            doc.height + 20
+        )
     
-    if os.path.exists("report.pdf"):
-        with open("report.pdf", "rb") as f:
-            st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
+        # ------------------------
+        # WATERMARK (center faded)
+        # ------------------------
+        canvas.setFont("Helvetica-Bold", 60)
+        canvas.setFillColor(colors.lightgrey)
+    
+        canvas.translate(300, 400)
+        canvas.rotate(30)
+    
+        canvas.drawCentredString(0, 0, "AltScore AI")
+    
+        canvas.restoreState()
+        
+        # ------------------------
+        # BUILD + DOWNLOAD FIX
+        # ------------------------
+        doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
+        
+        if os.path.exists("report.pdf"):
+            with open("report.pdf", "rb") as f:
+                st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
