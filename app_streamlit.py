@@ -141,7 +141,37 @@ total_expenses = fixed_obligations + other_expenses
 total_savings = total_income - total_expenses
 
 st.markdown('</div>', unsafe_allow_html=True)
+# ------------------------
+# CSV UPLOAD (BANK STATEMENT)
+# ------------------------
+st.markdown("---")
+st.markdown("## 📂 Bank Statement (Optional)")
 
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+    st.success("File uploaded successfully")
+
+    # Basic validation
+    if "amount" in df.columns:
+
+        transactions = len(df)
+
+        # UPI detection (simple heuristic)
+        upi = df[df["amount"] < 2000].shape[0]
+
+        # P2P detection (mid-sized transfers)
+        p2p = df[(df["amount"] > 2000) & (df["amount"] < 20000)].shape[0]
+
+        st.info(f"Transactions detected: {transactions}")
+        st.info(f"UPI transactions: {upi}")
+        st.info(f"P2P transfers: {p2p}")
+
+    else:
+        st.error("CSV must contain 'amount' column")
+        
 # ------------------------
 # BEHAVIORAL
 # ------------------------
@@ -149,16 +179,22 @@ st.markdown("---")
 st.markdown("## 📊 Behavioral Signals")
 st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, user can adjust manually.")
 
-transactions = st.slider("Transactions", 0, 300, 100)
+# Use CSV values if available
+transactions = transactions if 'transactions' in locals() else st.slider("Transactions", 0, 300, 100)
 st.caption("Number of financial transactions. Higher = more active financial behavior.")
+
 savings = st.slider("Savings ratio", 0.0, 1.0, 0.2)
 st.caption("Savings Ratio = Monthly Savings / Monthly Income. Higher ratio indicates better financial discipline.")
+
 bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
 st.caption("Measures how consistently bills are paid. Higher = more reliable borrower.")
-upi = st.slider("UPI based transactions in a month", 0, 500, 20)
+
+upi = upi if 'upi' in locals() else st.slider("UPI Transactions", 0, 500, 20)
 st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
-p2p = st.slider("P2P transfers in a month", 0, 100, 20)
+
+p2p = p2p if 'p2p' in locals() else st.slider("P2P Transfers", 0, 100, 20)
 st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
+
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
 st.caption("Indicates how stable the user's location is. Higher stability reduces default risk.")
 
