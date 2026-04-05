@@ -407,25 +407,25 @@ if st.session_state.results is not None:
         
     st.markdown("### 📊 Credit Score Gauge")
             
-        fig = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=r["score"],
-                title={'text': "Credit Score"},
-                gauge={
-                    'axis': {'range': [300, 900]},
-                    'bar': {'color': "#1f4e79"},
-                    'steps': [
-                        {'range': [300, 650], 'color': "red"},
-                        {'range': [650, 700], 'color': "orange"},
-                        {'range': [700, 750], 'color': "yellow"},
-                        {'range': [750, 800], 'color': "lightgreen"},
-                        {'range': [800, 900], 'color': "green"},
-                    ],
-                }
-            ))
+    fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=r["score"],
+            title={'text': "Credit Score"},
+            gauge={
+                'axis': {'range': [300, 900]},
+                'bar': {'color': "#1f4e79"},
+                'steps': [
+                    {'range': [300, 650], 'color': "red"},
+                    {'range': [650, 700], 'color': "orange"},
+                    {'range': [700, 750], 'color': "yellow"},
+                    {'range': [750, 800], 'color': "lightgreen"},
+                    {'range': [800, 900], 'color': "green"},
+                ],
+            }
+        ))
             
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
