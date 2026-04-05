@@ -376,8 +376,8 @@ if st.session_state.results is not None:
     
                 st.markdown(response.choices[0].message.content)
     
-            except Exception as e:            
-                st.markdown('</div>', unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"AI Error: {str(e)}")
     
     # ------------------------
     # CONFIDENCE SCORE
