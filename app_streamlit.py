@@ -707,8 +707,8 @@ if st.session_state.results is not None:
         disc_style
     ))
     
-def draw_border(canvas, doc):
-    canvas.saveState()
+    def draw_border(canvas, doc):
+        canvas.saveState()
 
     # ------------------------
     # BORDER (thin, clean)
