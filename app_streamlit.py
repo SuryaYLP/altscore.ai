@@ -73,7 +73,7 @@ if profile == "Gig Worker":
 
     # ---------------- DELIVERY ----------------
     if sub_profile == "Delivery Agent":
-        primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 15000)
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 15000)
         cv = st.slider("Earnings volatility / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
         tenure = st.slider("Platform tenure (months)", 0, 60, 42)
         completion = st.slider("Order completion rate: 1-All orders fulfilled", 0.0, 1.0, 0.9)
@@ -83,7 +83,7 @@ if profile == "Gig Worker":
 
     # ---------------- DRIVER ----------------
     elif sub_profile == "Driver Partner":
-        primary_income = st.number_input("Monthly payout (₹)", 0, 200000, 25000)
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 25000)
         cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
         weekly_trend = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -1.0, 1.0, 0.5)
         cancel_rate = st.slider("Ride aancellation rate", 0.0, 1.0, 0.1)
@@ -95,7 +95,7 @@ if profile == "Gig Worker":
 
     # ---------------- SERVICE ----------------
     elif sub_profile == "Service Professional":
-        primary_income = st.number_input("Monthly revenue (₹)", 0, 200000, 40000)
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 40000)
         completion = st.slider("Job completion rate", 0.0, 1.0, 0.9)
         repeat = st.slider("Repeat customer rate", 0.0, 1.0, 0.5)
         growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
@@ -106,7 +106,7 @@ if profile == "Gig Worker":
 
     # ---------------- BLUE COLLAR / OTHERS ----------------
     elif sub_profile == "Blue Collar / Others":
-        primary_income = st.number_input("Monthly revenue (₹)", 0, 200000, 40000)
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 40000)
         growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
         seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
         cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
@@ -114,7 +114,7 @@ if profile == "Gig Worker":
     # ---------------- CROSS PLATFORM ----------------
     st.markdown("### 🌐 Cross Platform Signals")
 
-    secondary_income = st.number_input("Monthly income from other platforms (₹)", 0, 200000, 10000)
+    secondary_income = st.number_input("Monthly income from other platforms (Rs.)", 0, 200000, 10000)
     platform_count = st.slider("Number of platforms", 1, 5, 2)
     active_months = st.slider("Consecutive active months", 0, 60, 12)
     yoy_growth = st.slider("YoY growth across all platforms", -50, 100, 10)
@@ -123,7 +123,7 @@ if profile == "Gig Worker":
     total_income = primary_income + secondary_income
 
 else:
-    total_income = st.number_input("Monthly income (₹)", 0, 200000, 30000)
+    total_income = st.number_input("Monthly income (Rs.)", 0, 200000, 30000)
     cv = 0.3
 
 st.markdown('</div>', unsafe_allow_html=True)
@@ -220,13 +220,13 @@ if st.button("🔍 Check AltScore Credit Score"):
 
     # Loan logic
     if score > 750:
-        loan = "₹2L - ₹5L"
+        loan = "Rs.2L - Rs.5L"
         rate = "10% - 14%"
     elif score > 600:
-        loan = "₹50K - ₹2L"
+        loan = "Rs.50K - Rs.2L"
         rate = "14% - 20%"
     else:
-        loan = "₹0 - ₹50K"
+        loan = "Rs.0 - Rs.50K"
         rate = "20%+"
 
     # ------------------------
@@ -477,7 +477,7 @@ if st.session_state.results is not None:
     # ------------------------
     header = Table([
         [
-            Paragraph("<b>AltScore.AI</b>", logo_style),
+            Paragraph("<b>AltScore.AI</b><br/><font size=10 color='#5b9bd5'>Alternative Credit Intelligence</font>", logo_style),
             Paragraph("<b>Credit Rating Report</b>", styles['Heading2'])
         ],
         [
@@ -707,20 +707,34 @@ if st.session_state.results is not None:
         disc_style
     ))
     
-    # ------------------------
-    # BORDER (FIXED)
-    # ------------------------
     def draw_border(canvas, doc):
-        canvas.saveState()
-        canvas.setStrokeColor(colors.HexColor("#1f4e79"))
-        canvas.setLineWidth(0.8)
-        canvas.rect(
-            doc.leftMargin - 10,
-            doc.bottomMargin - 10,
-            doc.width + 20,
-            doc.height + 20
-        )
-        canvas.restoreState()
+    canvas.saveState()
+
+    # ------------------------
+    # BORDER (thin, clean)
+    # ------------------------
+    canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+    canvas.setLineWidth(0.8)
+
+    canvas.rect(
+        doc.leftMargin - 10,
+        doc.bottomMargin - 10,
+        doc.width + 20,
+        doc.height + 20
+    )
+
+    # ------------------------
+    # WATERMARK (center faded)
+    # ------------------------
+    canvas.setFont("Helvetica-Bold", 60)
+    canvas.setFillColor(colors.lightgrey)
+
+    canvas.translate(300, 400)
+    canvas.rotate(30)
+
+    canvas.drawCentredString(0, 0, "AltScore AI")
+
+    canvas.restoreState()
     
     # ------------------------
     # BUILD + DOWNLOAD FIX
