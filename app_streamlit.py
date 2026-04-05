@@ -730,7 +730,7 @@ if st.session_state.results is not None:
         canvas.translate(300, 400)
         canvas.rotate(30)
     
-        canvas.drawCentredString(0, 0, "AltScore AI")
+        canvas.drawCentredString(0, 0, "AltScore.AI")
     
         canvas.restoreState()
         
