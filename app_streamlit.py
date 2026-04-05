@@ -477,15 +477,14 @@ if st.session_state.results is not None:
     # ------------------------
     header = Table([
         [
-            Paragraph("<b>AltScore.AI</b><br/><font size=10 color='#5b9bd5'>Alternative Credit Intelligence</font>", logo_style),
+            Paragraph("<b>AltScore.AI</b><br/><font size=10 color='#5b9bd5'>Alternative Credit Scoring</font>", logo_style),
             Paragraph("<b>Credit Rating Report</b>", styles['Heading2'])
         ],
         [
             Paragraph(datetime.now().strftime("%d %B %Y, %I:%M %p"), styles['Normal']),
             Paragraph(
-                "This report is an indicative credit assessment based on alternative data. "
-                "It is not a bureau score (CIBIL/Experian). Data is user-provided and model-derived. "
-                "No liability is assumed for financial decisions based on this report.",
+                "This report is an indicative credit assessment report based on user data. "
+                "All underwriting insights are model-derived.",
                 disc_style
             )
         ]
@@ -702,7 +701,6 @@ if st.session_state.results is not None:
     # ------------------------
     content.append(Paragraph(
         "Disclaimer: This report is generated using AI-based alternative credit modeling. "
-        "It is not a legally binding credit score. Users must exercise independent judgment. "
         "AltScore AI assumes no liability for decisions made based on this report.",
         disc_style
     ))
