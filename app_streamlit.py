@@ -515,15 +515,43 @@ if st.session_state.results is not None:
     content.append(summary)
     content.append(Spacer(1, 12))
     
-   # ------------------------
-# CLEAN PDF GAUGE (NO PLOTLY)
+  # ------------------------
+# ADVANCED CIBIL-STYLE GAUGE
 # ------------------------
 
     score = r["score"]
     
     content.append(Paragraph("Credit Score", styles['Heading3']))
     
-    # Range labels
+    # ------------------------
+    # SCORE CATEGORY
+    # ------------------------
+    if score >= 800:
+        category = "Excellent"
+        cat_color = colors.green
+    elif score >= 750:
+        category = "Very Good"
+        cat_color = colors.green
+    elif score >= 700:
+        category = "Good"
+        cat_color = colors.darkgoldenrod
+    elif score >= 650:
+        category = "Fair"
+        cat_color = colors.orange
+    else:
+        category = "Poor"
+        cat_color = colors.red
+    
+    content.append(Paragraph(
+        f"<b>Score:</b> {score} &nbsp;&nbsp;&nbsp; <b>Category:</b> <font color='{cat_color.hexval()}'>{category}</font>",
+        styles['Normal']
+    ))
+    
+    content.append(Spacer(1, 6))
+    
+    # ------------------------
+    # RANGE LABELS
+    # ------------------------
     range_table = Table([["300", "", "900"]], colWidths=[1*inch, 4*inch, 1*inch])
     range_table.setStyle(TableStyle([
         ('ALIGN', (0,0), (0,0), 'LEFT'),
@@ -531,40 +559,62 @@ if st.session_state.results is not None:
     ]))
     content.append(range_table)
     
-    # Colored segments (CIBIL-style)
-    segments = [
-        (300, 650, colors.red),
-        (650, 700, colors.orange),
-        (700, 750, colors.yellow),
-        (750, 900, colors.green)
+    # ------------------------
+    # GRADIENT BAND (SIMULATED)
+    # ------------------------
+    # 10 segments for smooth gradient
+    colors_list = [
+        colors.red,
+        colors.orangered,
+        colors.orange,
+        colors.gold,
+        colors.yellow,
+        colors.yellowgreen,
+        colors.limegreen,
+        colors.green,
+        colors.darkgreen,
+        colors.HexColor("#006400")
     ]
     
-    bar = []
-    for seg in segments:
-        width = int((seg[1] - seg[0]) / 600 * 400)
-        bar.append(("", width, seg[2]))
+    segment_width = 400 / len(colors_list)
     
-    bar_table = Table([[b[0] for b in bar]],
-                      colWidths=[b[1] for b in bar],
-                      rowHeights=10)
+    band_table = Table(
+        [[""] * len(colors_list)],
+        colWidths=[segment_width]*len(colors_list),
+        rowHeights=12
+    )
     
-    bar_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (0,0), colors.red),
-        ('BACKGROUND', (1,0), (1,0), colors.orange),
-        ('BACKGROUND', (2,0), (2,0), colors.yellow),
-        ('BACKGROUND', (3,0), (3,0), colors.green),
+    for i, c in enumerate(colors_list):
+        band_table.setStyle(TableStyle([
+            ('BACKGROUND', (i,0), (i,0), c)
+        ]))
+    
+    content.append(band_table)
+    
+    # ------------------------
+    # TRIANGLE MARKER (FIXED POSITION)
+    # ------------------------
+    usable_width = 400  # must match band width
+    normalized = (score - 300) / 600
+    normalized = max(0, min(normalized, 1))
+    
+    marker_pos = normalized * usable_width
+    
+    # Build marker row with 3 columns:
+    # [empty space][triangle][remaining space]
+    marker_table = Table(
+        [["", "▲", ""]],
+        colWidths=[marker_pos, 10, usable_width - marker_pos]
+    )
+    
+    marker_table.setStyle(TableStyle([
+        ('ALIGN', (1,0), (1,0), 'CENTER'),
+        ('TEXTCOLOR', (1,0), (1,0), colors.black)
     ]))
     
-    content.append(bar_table)
-    
-    # Marker for score
-    marker_pos = int((score - 300) / 600 * 400)
-    
-    marker_table = Table([["▲"]], colWidths=[marker_pos], rowHeights=10)
     content.append(marker_table)
     
     content.append(Spacer(1, 12))
-        
     # ------------------------
     # RISK INLINE (FIXED)
     # ------------------------
@@ -630,12 +680,28 @@ if st.session_state.results is not None:
     
     content.append(monthly)
     content.append(Spacer(1, 12))
+    # ------------------------
+    # LOAN RECOMMENDATION
+    # ------------------------
+    content.append(Paragraph("Loan Recommendation", section_style))
     
+    if score >= 800:
+        recommendation = "Eligible for premium loans with lowest interest rates. High approval probability."
+    elif score >= 700:
+        recommendation = "Eligible for standard loans with moderate interest rates."
+    elif score >= 600:
+        recommendation = "Eligible for small-ticket loans with higher interest rates."
+    else:
+        recommendation = "High risk borrower. Lending should be cautious or secured."
+    
+    content.append(Paragraph(recommendation, styles['Normal']))
+    content.append(Spacer(1, 12))
+        
     # ------------------------
     # FINAL DISCLAIMER
     # ------------------------
     content.append(Paragraph(
-        "Final Disclaimer: This report is generated using AI-based alternative credit modeling. "
+        "Disclaimer: This report is generated using AI-based alternative credit modeling. "
         "It is not a legally binding credit score. Users must exercise independent judgment. "
         "AltScore AI assumes no liability for decisions made based on this report.",
         disc_style
