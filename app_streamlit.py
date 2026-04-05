@@ -397,7 +397,7 @@ if st.session_state.results is not None:
                                 'range': [0, 1],
                                 'tickvals': [0, 0.25, 0.5, 0.75, 1],
                                 'ticktext': ["0.00", "0.25", "0.50", "0.75", "1.00"],
-                                'tickfont': {'size': 10, 'color': "gray"}
+                                'tickfont': {'size': 10, 'color': "gray"},
                                 'tickcolor': "lightgray",
                                 'tickwidth': 1,
                             },
