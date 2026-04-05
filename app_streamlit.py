@@ -112,7 +112,7 @@ if profile == "Gig Worker":
         cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
 
     # ---------------- CROSS PLATFORM ----------------
-    st.markdown("### 🌐 Income from other sources(Optional)")
+    st.markdown("### 🌐 Income from other sources (Optional)")
 
     secondary_income = st.number_input("Monthly income from other sources (Rs.)", 0, 200000, 5000)
     
@@ -177,21 +177,30 @@ st.markdown("## 📊 Behavioral Signals")
 st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, user can adjust manually.")
 
 # Use CSV values if available
-transactions = transactions if 'transactions' in locals() else st.slider("Transactions", 0, 300, 100)
-st.caption("Number of financial transactions. Higher = more active financial behavior.")
+if 'transactions' in locals():
+    st.write(f"Transactions (from CSV): {transactions}")
+else:
+    transactions = st.slider("Transactions", 0, 300, 100)
+    st.caption("Number of financial transactions. Higher = more active financial behavior.")
+
+if 'upi' in locals():
+    st.write(f"UPI Transactions (from CSV): {upi}")
+else:
+    upi = st.slider("UPI Transactions", 0, 500, 20)
+    st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
+
+if 'p2p' in locals():
+    st.write(f"P2P Transfers (from CSV): {p2p}")
+else:
+    p2p = st.slider("P2P Transfers", 0, 100, 20)
+    st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
 
 savings = st.slider("Savings ratio", 0.0, 1.0, 0.4)
 st.caption("Savings Ratio = Monthly Savings / Monthly Income. Higher ratio indicates better financial discipline.")
 
 bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
 st.caption("Measures how consistently bills are paid. Higher = more reliable borrower.")
-
-upi = upi if 'upi' in locals() else st.slider("UPI Transactions", 0, 500, 20)
-st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
-
-p2p = p2p if 'p2p' in locals() else st.slider("P2P Transfers", 0, 100, 20)
-st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
-
+        
 location = st.slider("Location stability", 0.0, 1.0, 0.7)
 st.caption("Indicates how stable the user's location is. Higher stability reduces default risk.")
 
@@ -757,10 +766,10 @@ if st.session_state.results is not None:
         # ------------------------
         # WATERMARK (center faded)
         # ------------------------
-        canvas.setFont("Helvetica-Bold", 60)
-        canvas.setFillColor(colors.lightgrey)
-    
-        canvas.translate(300, 400)
+        canvas.setFillColor(colors.HexColor("#d6e6f5"))  # pale blue
+        canvas.setFont("Helvetica-Bold", 50)
+        canvas.setFillAlpha(0.15)
+        canvas.translate(250, 350)
         canvas.rotate(30)
     
         canvas.drawCentredString(0, 0, "AltScore.AI")
