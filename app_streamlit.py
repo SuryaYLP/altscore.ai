@@ -371,39 +371,64 @@ if st.session_state.results is not None:
     
     # ---------------- RIGHT SIDE (GAUGE GRID)
     with col2:
-    
-        st.markdown("#### Behavioral Score Gauges")
-    
-        g1, g2 = st.columns(2)
-        g3, g4 = st.columns(2)
-    
-        def create_gauge(title, value):
-            return go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=value,
-                title={'text': title},
-                gauge={
-                    'axis': {'range': [0, 1]},
-                    'bar': {'color': "#1f4e79"},
-                    'steps': [
-                        {'range': [0, 0.4], 'color': "red"},
-                        {'range': [0.4, 0.7], 'color': "yellow"},
-                        {'range': [0.7, 1], 'color': "green"},
-                    ],
-                }
-            ))
-    
-        with g1:
-            st.plotly_chart(create_gauge("Stability", r["stability"]), use_container_width=True)
-    
-        with g2:
-            st.plotly_chart(create_gauge("Frequency", r["frequency"]), use_container_width=True)
-    
-        with g3:
-            st.plotly_chart(create_gauge("Cash Flow", r["cf"]), use_container_width=True)
-    
-        with g4:
-            st.plotly_chart(create_gauge("Savings", r["savings_ratio"]), use_container_width=True)
+
+    st.markdown("#### Behavioral Score Gauges")
+
+    g1, g2 = st.columns(2)
+    g3, g4 = st.columns(2)
+
+    def get_label(value):
+        if value >= 0.7:
+            return "Strong"
+        elif value >= 0.4:
+            return "Moderate"
+        else:
+            return "Weak"
+
+    def create_gauge(title, value):
+
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=value,
+            number={'font': {'size': 28}},
+            title={'text': title, 'font': {'size': 14}},
+            gauge={
+                'axis': {'range': [0, 1], 'tickwidth': 0},
+                'bar': {'color': "#1f4e79", 'thickness': 0.25},
+                'bgcolor': "white",
+                'borderwidth': 0,
+                'steps': [
+                    {'range': [0, 0.4], 'color': "#fde0dd"},   # soft red
+                    {'range': [0.4, 0.7], 'color': "#fff3cd"}, # soft yellow
+                    {'range': [0.7, 1], 'color': "#d4edda"},   # soft green
+                ],
+            }
+        ))
+
+        fig.update_layout(
+            margin=dict(t=40, b=0, l=0, r=0),
+            height=220
+        )
+
+        return fig
+
+    # ---------------- Gauges
+
+    with g1:
+        st.plotly_chart(create_gauge("Stability", r["stability"]), use_container_width=True)
+        st.markdown(f"**{get_label(r['stability'])}**")
+
+    with g2:
+        st.plotly_chart(create_gauge("Frequency", r["frequency"]), use_container_width=True)
+        st.markdown(f"**{get_label(r['frequency'])}**")
+
+    with g3:
+        st.plotly_chart(create_gauge("Cash Flow", r["cf"]), use_container_width=True)
+        st.markdown(f"**{get_label(r['cf'])}**")
+
+    with g4:
+        st.plotly_chart(create_gauge("Savings", r["savings_ratio"]), use_container_width=True)
+        st.markdown(f"**{get_label(r['savings_ratio'])}**")
         
     st.markdown("### 📊 Credit Score Gauge")
             
