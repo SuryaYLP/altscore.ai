@@ -1,20 +1,863 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import math
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import os
+from openai import OpenAI
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+if "results" not in st.session_state:
+    st.session_state.results = None
+    
+st.set_page_config(page_title="AltScore AI", layout="wide")
+# ------------------------
+# UI STYLE
+# ------------------------
+st.markdown("""
+<style>
+.section {
+    background-color: #f5f9fc;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+</style>
+""", unsafe_allow_html=True)
+# ------------------------
+# HEADER
+# ------------------------
+st.title("💳 AltScore AI")
+st.caption("Behavioral Credit Underwriting Engine")
 
-st.title("AltScore AI")
+st.markdown("---")
 
-transactions = st.slider("Monthly Transactions", 0, 200, 100)
-recharge = st.slider("Recharge Frequency", 0, 20, 5)
-location = st.slider("Location Stability", 0.0, 1.0, 0.5)
+st.markdown('</div>', unsafe_allow_html=True)
+# ------------------------
+# SESSION START BUTTON
+# ------------------------
+score = None
+foir = None
+stability = None
+frequency = None
+cf = None
 
-score = 300 + transactions*2 + recharge*5 + int(location*200)
-score = min(score, 900)
+if "start" not in st.session_state:
+    st.session_state.start = False
 
-if score > 750:
-    risk = "Low"
-elif score > 600:
-    risk = "Medium"
+if st.button("🚀 Click to Assess Creditworthiness"):
+    st.session_state.start = True
+
+if not st.session_state.start:
+    st.stop()
+st.markdown('</div>', unsafe_allow_html=True)
+# ------------------------
+# PROFILE
+# ------------------------
+profile = st.selectbox("Select Profile", ["Gig Worker", "Salaried", "Informal"])
+
+# ------------------------
+# GIG SEGMENTATION
+# ------------------------
+primary_income = 0
+
+if profile == "Gig Worker":
+
+    st.markdown("## 👷 Gig Worker Details")
+
+    sub_profile = st.selectbox(
+        "Select Category",
+        ["Delivery Agent", "Driver Partner", "Service Professional", "Blue Collar / Others"]
+    )
+
+    # ---------------- DELIVERY ----------------
+    if sub_profile == "Delivery Agent":
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 20000)
+        cv = st.slider("Earnings volatility / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
+        tenure = st.slider("Platform tenure (months)", 0, 60, 42)
+        completion = st.slider("Order completion rate: 1-All orders fulfilled", 0.0, 1.0, 0.9)
+        seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
+        rating_trend = st.slider("Rating trend: 0-Lowest Rating, 1-Highest Rating", 0.0, 1.0, 0.2)
+        active_days = st.slider("Active days per month", 0, 30, 22)
+
+    # ---------------- DRIVER ----------------
+    elif sub_profile == "Driver Partner":
+        primary_income = st.number_input("Monthly payout (Rs.)", 0, 200000, 20000)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.3)
+        weekly_trend = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -1.0, 1.0, 0.5)
+        cancel_rate = st.slider("Ride cancellation rate", 0.0, 1.0, 0.1)
+        tenure = st.slider("Platform tenure (months)", 0, 60, 18)
+        rating = st.slider("Driver rating: 0-Lowest Rating, 5-Highest Rating", 1.0, 5.0, 4.5)
+        acceptance = st.slider("Ride acceptance rate: 1-All rides are accepted", 0.0, 1.0, 0.8)
+        ownership = st.selectbox("Vehicle ownership", ["Owned", "EMI", "Rented"])
+        surge = st.slider("Surge participation", 0.0, 1.0, 0.5)
+
+    # ---------------- SERVICE ----------------
+    elif sub_profile == "Service Professional":
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 20000)
+        completion = st.slider("Job completion rate", 0.0, 1.0, 0.9)
+        repeat = st.slider("Repeat customer rate", 0.0, 1.0, 0.5)
+        growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
+        rating_volume = st.slider("Avg. rating in the last 4 weeks", 0.0, 1.0, 0.7)
+        upskilling = st.slider("Certification level: 0-No upskilling in the last 1 year", 0.0, 1.0, 0.6)
+        breadth = st.slider("Category breadth: 0.1 increment for every category ", 0.0, 1.0, 0.5)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
+
+    # ---------------- BLUE COLLAR / OTHERS ----------------
+    elif sub_profile == "Blue Collar / Others":
+        primary_income = st.number_input("Monthly revenue (Rs.)", 0, 200000, 20000)
+        growth = st.slider("Weekly earnings trend: Rolling 4-week income growth or decline", -0.5, 1.0, 0.1)
+        seasonality = st.slider("Income seasonality: 0-Regular Income, 1-Seasonal Income", 0.0, 1.0, 0.3)
+        cv = st.slider("Income Stability / CV (Coefficient of Variation): 0-Stable Earnings, 1-Highly Volatile ", 0.0, 1.0, 0.2)
+
+    # ---------------- CROSS PLATFORM ----------------
+    st.markdown("### 🌐 Income from other sources (Optional)")
+
+    secondary_income = st.number_input("Monthly income from other sources (Rs.)", 0, 200000, 5000)
+    
+
+    total_income = primary_income + secondary_income
+
 else:
-    risk = "High"
- 
-st.write("### Credit Score:", score)
-st.write("### Risk Level:", risk)
+    total_income = st.number_input("Monthly income (Rs.)", 0, 200000, 25000)
+    cv = 0.3
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ------------------------
+# EXPENSES
+# ------------------------
+st.markdown("---")
+st.markdown("## 💰 Expenses")
+
+fixed_obligations = st.number_input("Fixed obligations per month (EMI, rent)", 0, 200000, 10000)
+other_expenses = st.number_input("Other expenses per month (Not including fixed obligations)", 0, 200000, 5000)
+
+total_expenses = fixed_obligations + other_expenses
+total_savings = total_income - total_expenses
+
+st.markdown('</div>', unsafe_allow_html=True)
+# ------------------------
+# CSV UPLOAD (BANK STATEMENT)
+# ------------------------
+st.markdown("---")
+st.markdown("## 📂 Bank Statement (Optional)")
+
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+    st.success("File uploaded successfully")
+
+    # Basic validation
+    if "amount" in df.columns:
+
+        transactions = len(df)
+
+        # UPI detection (simple heuristic)
+        upi = df[df["amount"] < 2000].shape[0]
+
+        # P2P detection (mid-sized transfers)
+        p2p = df[(df["amount"] > 2000) & (df["amount"] < 20000)].shape[0]
+
+        st.info(f"Transactions detected: {transactions}")
+        st.info(f"UPI transactions: {upi}")
+        st.info(f"P2P transfers: {p2p}")
+
+    else:
+        st.error("CSV must contain 'amount' column")
+        
+# ------------------------
+# BEHAVIORAL
+# ------------------------
+st.markdown("---")
+st.markdown("## 📊 Behavioral Signals")
+st.caption("If CSV file is uploaded, these values are auto-filled. Otherwise, user can adjust manually.")
+
+# Use CSV values if available
+if 'transactions' in locals():
+    st.write(f"Total number of financial transactions (extracted from CSV file): {transactions}")
+else:
+    transactions = st.slider("Transactions", 0, 300, 100)
+    st.caption("Number of financial transactions. Higher = more active financial behavior.")
+
+if 'upi' in locals():
+    st.write(f"Number of UPI transactions (extracted from CSV file): {upi}")
+else:
+    upi = st.slider("UPI Transactions", 0, 500, 20)
+    st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
+
+if 'p2p' in locals():
+    st.write(f"Number of P2P Transfers (extracted from CSV file): {p2p}")
+else:
+    p2p = st.slider("P2P Transfers", 0, 100, 20)
+    st.caption("Peer-to-peer transfers. Moderate activity is healthy; extremely high may indicate cash churn.")
+
+savings = st.slider("Savings ratio", 0.0, 1.0, 0.4)
+st.caption("Savings Ratio = Monthly Savings / Monthly Income. Higher ratio indicates better financial discipline.")
+
+bill_pay = st.slider("Bill payment consistency", 0.0, 1.0, 0.6)
+st.caption("Measures how consistently bills are paid. Higher = more reliable borrower.")
+        
+location = st.slider("Location stability", 0.0, 1.0, 0.7)
+st.caption("Indicates how stable the user's location is. Higher stability reduces default risk.")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section">', unsafe_allow_html=True)
+# ------------------------
+# RESULT BUTTON
+# ------------------------
+# ------------------------
+# MONTHLY SUMMARY
+# ------------------------
+total_savings = total_income - total_expenses
+# ------------------------
+# FIX: Define savings ratio
+# ------------------------
+total_savings = total_income - total_expenses
+calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+# If user changed slider use that, else fallback
+try:
+    final_savings_ratio = savings if savings > 0 else calc_savings_ratio
+except:
+    final_savings_ratio = calc_savings_ratio
+savings = final_savings_ratio
+calc_savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+# If user has moved slider, use that, else fallback
+final_savings_ratio = savings if savings > 0 else calc_savings_ratio
+
+# ------------------------
+if st.button("🔍 Check AltScore Credit Score"):
+    # ------------------------
+    # CALCULATIONS
+    # ------------------------
+    total_savings = total_income - total_expenses
+    savings_ratio = (total_savings / total_income) if total_income > 0 else 0
+
+    foir = fixed_obligations / total_income if total_income > 0 else 0
+    stability = max(0, 1 - cv)
+    frequency = min(transactions / 200, 1)
+    cf = max(0, 1 - (total_expenses / total_income)) if total_income > 0 else 0.5
+
+    score = 300
+    score += int(200 * stability)
+    score += int(150 * frequency)
+    score += int(150 * cf)
+    score += int(150 * savings_ratio)
+    score += int(150 * bill_pay)
+
+    if foir < 0.4:
+        score += 100
+    elif foir < 0.6:
+        score += 40
+    else:
+        score -= 100
+
+    score = max(300, min(score, 900))
+
+    # Loan logic
+    if score > 750:
+        loan = "Rs.2L - Rs.5L"
+        rate = "10% - 14%"
+    elif score > 600:
+        loan = "Rs.50K - Rs.2L"
+        rate = "14% - 20%"
+    else:
+        loan = "Rs.0 - Rs.50K"
+        rate = "20%+"
+
+    # ------------------------
+    # STORE EVERYTHING
+    # ------------------------
+    st.session_state.results = {
+        "score": score,
+        "foir": foir,
+        "stability": stability,
+        "frequency": frequency,
+        "cf": cf,
+        "loan": loan,
+        "rate": rate,
+        "savings_ratio": savings_ratio,
+        "total_income": total_income,
+        "total_expenses": total_expenses,
+        "total_savings": total_savings
+    }
+if st.session_state.results is not None:
+
+    r = st.session_state.results
+
+    st.markdown("---")
+    st.markdown("## 📊 Credit Assessment Results")
+
+    # Top Metrics
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Credit Score", r["score"])
+    c2.metric("FOIR", round(r["foir"], 2))
+    c3.metric("Savings Ratio", round(r["savings_ratio"], 2))
+    c4.metric("Eligible Loan", r["loan"])
+
+    st.progress(r["score"] / 900)
+
+    # Monthly Summary
+    st.markdown("### 📊 Monthly Summary")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Income", int(r["total_income"]))
+    m2.metric("Expenses", int(r["total_expenses"]))
+    m3.metric("Savings", int(r["total_savings"]))
+
+    # Underwriting Signals
+    st.markdown("### 🧠 Underwriting Signals")
+    u1, u2, u3 = st.columns(3)
+    u1.metric("Stability - How consistent the income is over time", round(r["stability"], 2))
+    u2.metric("Frequency - How regularly money comes into the account", round(r["frequency"], 2))
+    u3.metric("Cash Flow - How much money is left after expenses", round(r["cf"], 2))
+
+    # ------------------------
+    # RISK LABEL
+    # ------------------------
+    if r["score"] > 750:
+        risk = "Low"
+        st.success("Low Risk")
+    elif r["score"] > 600:
+        risk = "Medium"
+        st.warning("Medium Risk")
+    else:
+        risk = "High"
+        st.error("High Risk")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ------------------------
+    # INTERACTIVE GRAPHS
+    # ------------------------
+    import plotly.express as px
+    import pandas as pd
+    st.markdown("### 📈 Financial Insights")
+    
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import pandas as pd
+    
+    # ---------------- LAYOUT
+    col1, col2 = st.columns(2)
+    
+    # ---------------- LEFT SIDE (BAR CHART)
+    with col1:
+        finance_df = pd.DataFrame({
+            "Category": ["Income", "Expenses", "Savings"],
+            "Amount": [
+                r["total_income"],
+                r["total_expenses"],
+                r["total_savings"]
+            ]
+        })
+    
+        fig1 = px.bar(
+            finance_df,
+            x="Category",
+            y="Amount",
+            color="Category",
+            text="Amount",
+            title="Income vs Expenses vs Savings"
+        )
+    
+        st.plotly_chart(fig1, use_container_width=True)
+    
+    # ---------------- RIGHT SIDE (GAUGE GRID)
+        with col2:
+    
+            st.markdown("#### Behavioral Score Gauges")
+        
+            g1, g2 = st.columns(2)
+            g3, g4 = st.columns(2)
+        
+            def get_label(value):
+                if value >= 0.7:
+                    return "Strong"
+                elif value >= 0.4:
+                    return "Moderate"
+                else:
+                    return "Weak"
+        
+            def create_gauge(title, value):
+        
+                fig = go.Figure(go.Indicator(
+                    mode="gauge+number",
+                    value=value,
+                    number={'font': {'size': 28}},
+                    title={'text': title, 'font': {'size': 14}},
+                    gauge={
+                        'axis': {
+                                'range': [0, 1],
+                                'tickvals': [0, 0.25, 0.5, 0.75, 1],
+                                'ticktext': ["0.00", "0.25", "0.50", "0.75", "1.00"],
+                                'tickfont': {'size': 10, 'color': "gray"},
+                                'tickcolor': "lightgray",
+                                'tickwidth': 1,
+                            },
+                        'bar': {'color': "#1f4e79", 'thickness': 0.25},
+                        'bgcolor': "white",
+                        'borderwidth': 0,
+                        'steps': [
+                            {'range': [0, 0.4], 'color': "#fde0dd"},   # soft red
+                            {'range': [0.4, 0.7], 'color': "#fff3cd"}, # soft yellow
+                            {'range': [0.7, 1], 'color': "#d4edda"},   # soft green
+                        ],
+                    }
+                ))
+        
+                fig.update_layout(
+                    margin=dict(t=40, b=0, l=0, r=0),
+                    height=220
+                )
+        
+                return fig
+        
+            # ---------------- Gauges
+        
+            with g1:
+                st.plotly_chart(create_gauge("Stability", r["stability"]), use_container_width=True)
+                st.markdown(f"**{get_label(r['stability'])}**")
+        
+            with g2:
+                st.plotly_chart(create_gauge("Frequency", r["frequency"]), use_container_width=True)
+                st.markdown(f"**{get_label(r['frequency'])}**")
+        
+            with g3:
+                st.plotly_chart(create_gauge("Cash Flow", r["cf"]), use_container_width=True)
+                st.markdown(f"**{get_label(r['cf'])}**")
+        
+            with g4:
+                st.plotly_chart(create_gauge("Savings", r["savings_ratio"]), use_container_width=True)
+                st.markdown(f"**{get_label(r['savings_ratio'])}**")
+            
+    st.markdown("### 📊 Credit Score Gauge")
+            
+    fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=r["score"],
+            title={'text': "Credit Score"},
+            gauge={
+                'axis': {'range': [300, 900]},
+                'bar': {'color': "#1f4e79"},
+                'steps': [
+                    {'range': [300, 650], 'color': "red"},
+                    {'range': [650, 700], 'color': "orange"},
+                    {'range': [700, 750], 'color': "yellow"},
+                    {'range': [750, 800], 'color': "lightgreen"},
+                    {'range': [800, 900], 'color': "green"},
+                ],
+            }
+        ))
+            
+    st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    # ------------------------
+    # GPT AI ANALYSIS
+    # ------------------------
+    st.markdown("### 🤖 AI Credit Analysis (Chat GPT API)")
+    
+    with st.spinner("AI is analyzing borrower profile..."):
+    
+            try:
+                prompt = f"""
+                You are a senior credit risk analyst.
+    
+                Analyze this borrower:
+    
+                Income: {r["total_income"]}
+                Expenses: {r["total_expenses"]}
+                Savings Ratio: {round(r["savings_ratio"],2)}
+                FOIR: {round(r["foir"],2)}
+                Stability Score: {round(r["stability"],2)}
+                Frequency Score: {round(r["frequency"],2)}
+                Cash Flow Score: {round(r["cf"],2)}
+    
+                Provide:
+                - Risk summary
+                - Key strengths
+                - Key risks
+                - Final recommendation
+                """
+    
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+    
+                st.markdown(response.choices[0].message.content)
+    
+            except Exception as e:
+                st.warning("Chat GPT API is unavailable at the moment — Displaying confidence score and AltScore rule based AI Analysis")
+    
+    # ------------------------
+    # CONFIDENCE SCORE
+    # ------------------------
+    confidence = (
+        0.25 * r["stability"] +
+        0.20 * r["frequency"] +
+        0.20 * r["cf"] +
+        0.20 * (1 - r["foir"]) +
+        0.15 * r["savings_ratio"]
+        )
+
+    confidence = max(0, min(confidence, 1))
+
+    st.markdown("### Confidence Score")
+
+
+
+    if confidence > 0.75:
+        st.success(f"High Confidence: {round(confidence,2)}")
+    elif confidence > 0.5:
+        st.warning(f"Moderate Confidence: {round(confidence,2)}")
+    else:
+        st.error(f"Low Confidence: {round(confidence,2)}")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ------------------------
+    # RULE-BASED AI ANALYSIS (SECOND AI — KEEPING)
+    # ------------------------
+    st.markdown("### AltScore Rule based AI Credit Analysis")
+    analysis = []
+        
+    analysis.append(f"Stability Score: {round(r['stability'],2)}")
+    analysis.append(f"Income Frequency: {round(r['frequency'],2)}")
+    analysis.append(f"Cash Flow Score: {round(r['cf'],2)}")
+    analysis.append(f"FOIR: {round(r['foir'],2)}")
+    analysis.append(f"Savings Ratio: {round(r['savings_ratio'],2)}")
+        
+    if r["stability"] < 0.5:
+        analysis.append("Income shows high volatility → repayment risk")
+        
+    if r["frequency"] < 0.5:
+        analysis.append("Income is irregular → inconsistent cash flow")
+        
+    if r["cf"] < 0.4:
+        analysis.append("Cash flow is weak → low financial buffer")
+        
+    if r["foir"] > 0.6:
+         analysis.append("High financial obligations → stress risk")
+        
+    if r["savings_ratio"] < 0.2:
+         analysis.append("Low savings → vulnerable to shocks")
+        
+    for line in analysis:
+        st.write("• " + line)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ------------------------
+    # PDF DOWNLOAD
+    # ------------------------
+    from reportlab.platypus import *
+    from reportlab.lib import colors
+    from reportlab.lib.styles import *
+    from reportlab.lib.units import inch
+    from datetime import datetime
+    import os
+    
+    doc = SimpleDocTemplate(
+        "report.pdf",
+        rightMargin=40, leftMargin=40, topMargin=50, bottomMargin=40
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    # ------------------------
+    # STYLES
+    # ------------------------
+    logo_style = ParagraphStyle(
+        'logo', parent=styles['Title'],
+        fontSize=28, textColor=colors.HexColor("#1f4e79"), spaceAfter=8
+    )
+    
+    section_style = ParagraphStyle(
+        'section', parent=styles['Heading2'],
+        fontSize=14, textColor=colors.HexColor("#1f4e79"), spaceAfter=6
+    )
+    
+    disc_style = ParagraphStyle(
+        'disc', parent=styles['Normal'],
+        fontSize=8, textColor=colors.grey, leading=10
+    )
+    
+    content = []
+    
+    # ------------------------
+    # HEADER
+    # ------------------------
+    header = Table([
+        [
+            Paragraph("<b>AltScore.AI</b>", logo_style),
+            Paragraph("<b>Credit Rating Report</b>", styles['Heading2'])
+        ],
+        [
+            Paragraph(datetime.now().strftime("%d %B %Y, %I:%M %p"), styles['Normal']),
+            Paragraph(
+                "This report is an indicative credit assessment report based on user data. "
+                "All underwriting insights are model-derived.",
+                disc_style
+            )
+        ]
+    ], colWidths=[3*inch, 3*inch])
+    
+    content.append(header)
+    content.append(Spacer(1, 12))
+    content.append(Paragraph("<hr/>", styles['Normal']))
+    
+    # ------------------------
+    # CREDIT SUMMARY
+    # ------------------------
+    content.append(Paragraph("Credit Assessment Results", section_style))
+    
+    summary = Table([
+        ["Credit Score", r["score"]],
+        ["FOIR", round(r["foir"],2)],
+        ["Savings Ratio", round(r["savings_ratio"],2)],
+        ["Eligible Loan", r["loan"]],
+    ])
+    
+    summary.setStyle(TableStyle([
+        ('BACKGROUND',(0,0),(-1,0),colors.lightblue),
+        ('GRID',(0,0),(-1,-1),0.3,colors.grey)
+    ]))
+    
+    content.append(summary)
+    content.append(Spacer(1, 12))
+    
+  # ------------------------
+# ADVANCED CIBIL-STYLE GAUGE
+# ------------------------
+
+    score = r["score"]
+    
+    content.append(Paragraph("Credit Score", styles['Heading3']))
+    
+    # ------------------------
+    # SCORE CATEGORY
+    # ------------------------
+    if score >= 800:
+        category = "Excellent"
+        cat_color = colors.green
+    elif score >= 750:
+        category = "Very Good"
+        cat_color = colors.green
+    elif score >= 700:
+        category = "Good"
+        cat_color = colors.darkgoldenrod
+    elif score >= 650:
+        category = "Fair"
+        cat_color = colors.orange
+    else:
+        category = "Poor"
+        cat_color = colors.red
+    
+    content.append(Paragraph(
+        f"<b>Score:</b> {score} &nbsp;&nbsp;&nbsp; <b>Category:</b> <font color='{cat_color.hexval()}'>{category}</font>",
+        styles['Normal']
+    ))
+    
+    content.append(Spacer(1, 6))
+    
+    # ------------------------
+    # RANGE LABELS
+    # ------------------------
+    range_table = Table([["300", "", "900"]], colWidths=[1*inch, 4*inch, 1*inch])
+    range_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('ALIGN', (2,0), (2,0), 'RIGHT'),
+    ]))
+    content.append(range_table)
+    
+    # ------------------------
+    # GRADIENT BAND (SIMULATED)
+    # ------------------------
+    # 10 segments for smooth gradient
+    colors_list = [
+        colors.red,
+        colors.orangered,
+        colors.orange,
+        colors.gold,
+        colors.yellow,
+        colors.yellowgreen,
+        colors.limegreen,
+        colors.green,
+        colors.darkgreen,
+        colors.HexColor("#006400")
+    ]
+    
+    segment_width = 400 / len(colors_list)
+    
+    band_table = Table(
+        [[""] * len(colors_list)],
+        colWidths=[segment_width]*len(colors_list),
+        rowHeights=12
+    )
+    
+    for i, c in enumerate(colors_list):
+        band_table.setStyle(TableStyle([
+            ('BACKGROUND', (i,0), (i,0), c)
+        ]))
+    
+    content.append(band_table)
+    
+    # ------------------------
+    # TRIANGLE MARKER (FIXED POSITION)
+    # ------------------------
+    usable_width = 400  # must match band width
+    normalized = (score - 300) / 600
+    normalized = max(0, min(normalized, 1))
+    
+    marker_pos = normalized * usable_width
+    
+    # Build marker row with 3 columns:
+    # [empty space][triangle][remaining space]
+    marker_table = Table(
+        [["", "▲", ""]],
+        colWidths=[marker_pos, 10, usable_width - marker_pos]
+    )
+    
+    marker_table.setStyle(TableStyle([
+        ('ALIGN', (1,0), (1,0), 'CENTER'),
+        ('TEXTCOLOR', (1,0), (1,0), colors.black)
+    ]))
+    
+    content.append(marker_table)
+    
+    content.append(Spacer(1, 12))
+    # ------------------------
+    # RISK INLINE (FIXED)
+    # ------------------------
+    risk = "Low Risk" if r["score"] > 750 else "Medium Risk" if r["score"] > 600 else "High Risk"
+    
+    risk_color = colors.green if r["score"] > 750 else colors.orange if r["score"] > 600 else colors.red
+    
+    content.append(Paragraph(
+        f"<b>Risk Classification:</b> <font color='{risk_color.hexval()}'>{risk}</font>",
+        styles['Heading3']
+    ))
+    content.append(Spacer(1, 12))
+    
+    # ------------------------
+    # AI ANALYSIS (FIXED)
+    # ------------------------
+    content.append(Paragraph("AltScore AI Insights", section_style))
+    
+    if r["cf"] < 0.4:
+        content.append(Paragraph("• Cash flow is weak → low financial buffer", styles['Normal']))
+    if r["savings_ratio"] < 0.2:
+        content.append(Paragraph("• Low savings → vulnerable to shocks", styles['Normal']))
+    
+    content.append(Spacer(1, 12))
+    
+    # ------------------------
+    # UNDERWRITING (WITH INTERPRETATION)
+    # ------------------------
+    content.append(Paragraph("Underwriting Signals", section_style))
+    
+    uw = Table([
+        ["Metric","Value","Range","Interpretation"],
+        ["Stability (Consistent of income over time)", round(r["stability"],2), "0.5-0.8",
+         "Stable income" if r["stability"]>0.6 else "Volatile income"],
+        ["Frequency (Regularity of income into account)", round(r["frequency"],2), "0.5-0.9",
+         "Consistent inflow" if r["frequency"]>0.6 else "Irregular income"],
+        ["Cash Flow (Money left after expenses)", round(r["cf"],2), "0.4-0.8",
+         "Healthy buffer" if r["cf"]>0.5 else "Weak surplus"],
+    ])
+    
+    uw.setStyle(TableStyle([
+        ('BACKGROUND',(0,0),(-1,0),colors.lightblue),
+        ('GRID',(0,0),(-1,-1),0.3,colors.grey)
+    ]))
+    
+    content.append(uw)
+    content.append(Spacer(1, 12))
+    
+    # ------------------------
+    # MONTHLY SUMMARY
+    # ------------------------
+    content.append(Paragraph("Monthly Summary", section_style))
+    
+    monthly = Table([
+        ["Income", f"Rs. {r['total_income']}"],
+        ["Expenses", f"Rs. {r['total_expenses']}"],
+        ["Savings", f"Rs. {r['total_savings']}"],
+    ])
+    
+    monthly.setStyle(TableStyle([
+        ('GRID',(0,0),(-1,-1),0.3,colors.grey)
+    ]))
+    
+    content.append(monthly)
+    content.append(Spacer(1, 12))
+    # ------------------------
+    # LOAN RECOMMENDATION
+    # ------------------------
+    content.append(Paragraph("Loan Recommendation", section_style))
+    
+    if score >= 800:
+        recommendation = "Eligible for premium loans with lowest interest rates. High approval probability."
+    elif score >= 700:
+        recommendation = "Eligible for standard loans with moderate interest rates."
+    elif score >= 600:
+        recommendation = "Eligible for small-ticket loans with higher interest rates."
+    else:
+        recommendation = "High risk borrower. Lending should be cautious or secured."
+    
+    content.append(Paragraph(recommendation, styles['Normal']))
+    content.append(Spacer(1, 12))
+        
+    # ------------------------
+    # FINAL DISCLAIMER
+    # ------------------------
+    content.append(Paragraph(
+        "Disclaimer: This report is generated using AI-based alternative credit modeling. "
+        "AltScore AI assumes no liability for decisions made based on this report.",
+        disc_style
+    ))
+    
+    def draw_border(canvas, doc):
+        canvas.saveState()
+
+        # ------------------------
+        # BORDER (thin, clean)
+        # ------------------------
+        canvas.setStrokeColor(colors.HexColor("#1f4e79"))
+        canvas.setLineWidth(0.8)
+    
+        canvas.rect(
+            doc.leftMargin - 10,
+            doc.bottomMargin - 10,
+            doc.width + 20,
+            doc.height + 20
+        )
+    
+        # ------------------------
+        # WATERMARK (center faded)
+        # ------------------------
+        canvas.setFillColor(colors.HexColor("#d6e6f5"))  # pale blue
+        canvas.setFont("Helvetica-Bold", 50)
+        canvas.setFillAlpha(0.15)
+        canvas.translate(250, 350)
+        canvas.rotate(30)
+    
+        canvas.drawCentredString(0, 0, "AltScore.AI")
+    
+        canvas.restoreState()
+        
+     # ------------------------
+    # BUILD + DOWNLOAD FIX
+    # ------------------------
+    doc.build(content, onFirstPage=draw_border, onLaterPages=draw_border)
+        
+    if os.path.exists("report.pdf"):
+        with open("report.pdf", "rb") as f:
+            st.download_button("📄 Download Report", f, file_name="AltScore_Report.pdf")
