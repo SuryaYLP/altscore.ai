@@ -68,7 +68,7 @@ if profile == "Gig Worker":
 
     sub_profile = st.selectbox(
         "Select Category",
-        ["Delivery Agent", "Driver Partner", "Service Professional", "Blue Collar / Others"]
+        ["Driver Partner", "Delivery Agent", "Service Professional", "Blue Collar / Others"]
     )
 
     # ---------------- DELIVERY ----------------
