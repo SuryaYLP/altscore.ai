@@ -461,7 +461,7 @@ if st.session_state.results is not None:
     # ------------------------
     # GPT AI ANALYSIS
     # ------------------------
-    st.markdown("### 🤖 AI Credit Analysis (Chat GPT API)")
+    st.markdown("### 🤖 AI Credit Analysis (Chat-GPT API)")
     
     with st.spinner("AI is analyzing borrower profile..."):
     
@@ -494,7 +494,7 @@ if st.session_state.results is not None:
                 st.markdown(response.choices[0].message.content)
     
             except Exception as e:
-                st.warning("Chat GPT API is unavailable at the moment — Displaying confidence score and AltScore rule based AI Analysis")
+                st.warning("API Triggered — Displaying confidence score and AltScore.AI Analysis")
     
     # ------------------------
     # CONFIDENCE SCORE
