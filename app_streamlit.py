@@ -510,7 +510,7 @@ if st.session_state.results is not None:
     confidence = max(0, min(confidence, 1))
 
     st.markdown("### Confidence Score")
-    st.caption("UPI activity. Moderate activity is healthy; extremely high may indicate cash churn.")
+
 
 
     if confidence > 0.75:
